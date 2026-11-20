@@ -3,6 +3,10 @@
   "version": "1.1.0",
   "description": "Kweha — jogo com tema de caderno, login e base de dados SQLite",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tendinho/Kweha.git"
+  },
   "engines": {
     "node": ">=24.0.0"
   },
