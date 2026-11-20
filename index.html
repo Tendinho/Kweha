@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="assets/icons/app-icon.svg" />
+  <meta http-equiv="refresh" content="0; url=html/index.html" />
+  <title>Kweha</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1b1350 0%, #0b1024 68%);
+      color: #fffdf4;
+    }
+    a {
+      color: #ffcc33;
+      font-weight: 700;
+    }
+    .loader {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      border: 3px solid rgba(255, 255, 255, 0.18);
+      border-top-color: #ff7a18;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 18px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    p {
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="loader" aria-hidden="true"></div>
+    <p>Kweha <a href="html/index.html">Start</a></p>
+  </div>
+  <script>
+    window.location.replace('html/index.html');
+  </script>
+</body>
+</html>

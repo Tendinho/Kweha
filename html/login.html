@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg" />
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg" />
+  <title data-i18n="login.pageTitle">Kweha — Entrar</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/login.css" />
+</head>
+<body>
+  <main class="notebook-page login-notebook">
+    <div class="page login-page">
+      <header class="top-bar">
+        <button class="btn-back" id="back-to-menu" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-arrow-left"></use>
+          </svg>
+          <span data-i18n="common.back">Voltar</span>
+        </button>
+        <span class="step-pill" data-i18n="login.step">Conta</span>
+      </header>
+
+      <section class="login-header">
+        <span class="eyebrow" data-i18n="login.eyebrow">A tua conta</span>
+        <h1 class="screen-title centered" data-i18n="login.title">Entrar no Kweha</h1>
+        <p class="subtitle" data-i18n="login.subtitle">Guarda o teu nome e prepara o modo online com amigos.</p>
+      </section>
+
+      <section class="login-card">
+        <div class="logged-user hidden" id="logged-user">
+          <div class="logged-avatar" id="logged-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-user"></use>
+            </svg>
+          </div>
+          <div class="logged-info">
+            <span class="logged-provider" id="logged-provider" data-i18n="login.loggedPlayer">Jogador</span>
+            <strong id="logged-name" data-i18n="winner.defaultPlayer">Jogador</strong>
+            <span class="logged-email" id="logged-email"></span>
+          </div>
+        </div>
+
+        <div class="local-auth" id="local-auth">
+          <div class="auth-tabs" role="tablist" data-i18n-aria-label="login.tabsAria" aria-label="Entrar ou criar conta">
+            <button class="auth-tab ativo" id="tab-login" type="button" role="tab" aria-selected="true" data-i18n="login.tabLogin">
+              Entrar
+            </button>
+            <button class="auth-tab" id="tab-register" type="button" role="tab" aria-selected="false" data-i18n="login.tabRegister">
+              Criar conta
+            </button>
+          </div>
+
+          <form class="auth-form" id="login-form" autocomplete="on">
+            <label class="auth-field" for="login-email">
+              <span class="auth-label" data-i18n="login.email">Email</span>
+              <input class="input" type="email" id="login-email" name="email" data-i18n-placeholder="login.emailPlaceholder" placeholder="tu@exemplo.com" autocomplete="email" required />
+            </label>
+
+            <label class="auth-field" for="login-password">
+              <span class="auth-label" data-i18n="login.password">Palavra-passe</span>
+              <input class="input" type="password" id="login-password" name="password" data-i18n-placeholder="login.passwordPlaceholder" placeholder="A tua palavra-passe" autocomplete="current-password" required />
+            </label>
+
+            <button class="btn btn-primary btn-block" type="submit" id="login-submit" data-i18n="login.submitLogin">
+              Entrar
+            </button>
+          </form>
+
+          <form class="auth-form hidden" id="register-form" autocomplete="on">
+            <label class="auth-field" for="register-name">
+              <span class="auth-label" data-i18n="login.name">Nome de jogador</span>
+              <input class="input" type="text" id="register-name" name="name" data-i18n-placeholder="login.namePlaceholder" placeholder="Até 18 caracteres" maxlength="18" autocomplete="nickname" required />
+            </label>
+
+            <label class="auth-field" for="register-email">
+              <span class="auth-label" data-i18n="login.email">Email</span>
+              <input class="input" type="email" id="register-email" name="email" data-i18n-placeholder="login.emailPlaceholder" placeholder="tu@exemplo.com" autocomplete="email" required />
+            </label>
+
+            <label class="auth-field" for="register-password">
+              <span class="auth-label" data-i18n="login.password">Palavra-passe</span>
+              <input class="input" type="password" id="register-password" name="password" data-i18n-placeholder="login.registerPasswordPlaceholder" placeholder="Pelo menos 6 caracteres" autocomplete="new-password" minlength="6" required />
+            </label>
+
+            <label class="auth-field" for="register-confirm">
+              <span class="auth-label" data-i18n="login.confirm">Repetir palavra-passe</span>
+              <input class="input" type="password" id="register-confirm" name="confirm" data-i18n-placeholder="login.confirmPlaceholder" placeholder="Repete a palavra-passe" autocomplete="new-password" minlength="6" required />
+            </label>
+
+            <button class="btn btn-primary btn-block" type="submit" id="register-submit" data-i18n="login.submitRegister">
+              Criar conta
+            </button>
+          </form>
+        </div>
+
+        <div class="login-divider" id="divider-auth">
+          <span data-i18n="login.or">ou</span>
+        </div>
+
+        <div class="login-providers" id="login-providers">
+          <button class="provider-btn google" id="google-login" type="button">
+            <span class="provider-icon" aria-hidden="true">G</span>
+            <span data-i18n="login.google">Entrar com Google</span>
+          </button>
+        </div>
+
+        <p class="login-note" id="login-note" role="status"></p>
+
+        <div class="login-divider">
+          <span data-i18n="login.noAccount">sem conta</span>
+        </div>
+
+        <button class="btn btn-ghost btn-block" id="guest-login" type="button" data-i18n="login.guest">
+          Continuar como convidado
+        </button>
+
+        <button class="btn btn-danger btn-block hidden" id="logout-btn" type="button" data-i18n="login.logout">
+          Terminar sessão
+        </button>
+      </section>
+
+      <footer class="login-footer">
+        <span class="sticker" data-i18n="login.footer">A tua conta fica guardada na base de dados do Kweha</span>
+      </footer>
+    </div>
+  </main>
+
+  <script src="../js/storage.js?v=20261119b"></script>
+  <script src="../js/i18n.js?v=20261119b"></script>
+  <script src="../js/audio.js?v=20261119b"></script>
+  <script src="../js/auth.js?v=20261119b"></script>
+  <script src="../js/login.js?v=20261119b"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+[Unit]
+Description=Kweha
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kweha
+Group=kweha
+WorkingDirectory=/opt/kweha
+ExecStart=/usr/bin/node --env-file-if-exists=.env server/server.js
+Restart=on-failure
+RestartSec=3
+Environment=NODE_ENV=production
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/kweha/data
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

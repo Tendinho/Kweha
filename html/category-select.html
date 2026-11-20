@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg" />
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg" />
+  <title data-i18n="categories.pageTitle">Kweha — Categorias</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/menu-escolha.css" />
+</head>
+<body>
+  <main class="notebook-page">
+    <div class="page category-page">
+      <header class="top-bar">
+        <button class="btn-back" id="back-to-mode" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-arrow-left"></use>
+          </svg>
+          <span data-i18n="common.back">Voltar</span>
+        </button>
+        <span class="step-pill" data-i18n="categories.step">Passo 2 de 3</span>
+      </header>
+
+      <section class="category-header">
+        <h1 class="screen-title centered" data-i18n="categories.title">Escolhe as categorias</h1>
+        <p class="subtitle" data-i18n="categories.subtitle">Nome e País são obrigatórios. Adiciona as categorias que quiseres para deixar a ronda mais difícil.</p>
+        <p class="online-category-note hidden" id="online-category-note" data-i18n="categories.onlineNote">As categorias que escolheres vão ser partilhadas com o teu adversário.</p>
+      </section>
+
+      <section class="difficulty-panel hidden" id="difficulty-panel" aria-label="Dificuldade da IA">
+        <div class="difficulty-copy">
+          <span class="eyebrow" data-i18n="difficulty.title">Dificuldade da IA</span>
+          <p data-i18n="difficulty.help">Escolhe o nível do computador antes de começares.</p>
+        </div>
+        <div class="difficulty-options" role="group" data-i18n-aria-label="difficulty.title" aria-label="Dificuldade da IA">
+          <button class="difficulty-btn" type="button" data-difficulty="easy" aria-pressed="false">
+            <strong data-i18n="difficulty.easy">Fácil</strong>
+            <span data-i18n="difficulty.easyDesc">A IA falha mais e escolhe respostas comuns.</span>
+          </button>
+          <button class="difficulty-btn" type="button" data-difficulty="normal" aria-pressed="false">
+            <strong data-i18n="difficulty.normal">Normal</strong>
+            <span data-i18n="difficulty.normalDesc">Equilíbrio entre erros e boas respostas.</span>
+          </button>
+          <button class="difficulty-btn" type="button" data-difficulty="hard" aria-pressed="false">
+            <strong data-i18n="difficulty.hard">Difícil</strong>
+            <span data-i18n="difficulty.hardDesc">A IA quase nunca falha e evita respostas óbvias.</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="difficulty-panel rounds-panel hidden" id="rounds-panel" aria-labelledby="rounds-title">
+        <div class="difficulty-copy">
+          <span class="eyebrow" id="rounds-title" data-i18n="rounds.title">Número de rondas</span>
+          <p data-i18n="rounds.help">Escolhe quantas rondas vão ser jogadas.</p>
+        </div>
+        <div class="difficulty-options rounds-options" role="group" data-i18n-aria-label="rounds.title" aria-label="Número de rondas">
+          <button class="difficulty-btn round-btn" type="button" data-rounds="3" aria-pressed="false">
+            <strong>3</strong>
+            <span data-i18n="rounds.short">rondas</span>
+          </button>
+          <button class="difficulty-btn round-btn" type="button" data-rounds="5" aria-pressed="false">
+            <strong>5</strong>
+            <span data-i18n="rounds.short">rondas</span>
+          </button>
+          <button class="difficulty-btn round-btn" type="button" data-rounds="10" aria-pressed="false">
+            <strong>10</strong>
+            <span data-i18n="rounds.short">rondas</span>
+          </button>
+          <button class="difficulty-btn round-btn" type="button" data-rounds="15" aria-pressed="false">
+            <strong>15</strong>
+            <span data-i18n="rounds.short">rondas</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="categories" data-i18n-aria-label="categories.aria" aria-label="Categorias do jogo">
+        <button class="category-item selected locked" type="button" data-category="name" aria-pressed="true">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-id-card"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.name">Nome</span>
+            <span class="category-foot" data-i18n="categories.required">Obrigatório</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item selected locked" type="button" data-category="country" aria-pressed="true">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-flag"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.country">País</span>
+            <span class="category-foot" data-i18n="categories.required">Obrigatório</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="animal" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-paw"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.animal">Animal</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="fruit" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-apple"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.fruit">Fruta</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="color" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-palette"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.color">Cor</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="object" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-box"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.object">Objeto</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="city" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-building"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.city">Cidade</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="movie" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-film"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.movie">Filme</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="anime" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-play"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.anime">Anime</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="football" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-trophy"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.football">Equipas de futebol</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="novela" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-film"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.novela">Novela</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="series" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-monitor"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.series">Série</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="sport" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-trophy"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.sport">Desporto</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="brand" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-box"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.brand">Marca</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="profession" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-user"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.profession">Profissão</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+
+        <button class="category-item" type="button" data-category="videogame" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-monitor"></use>
+            </svg>
+          </span>
+          <span class="category-info">
+            <span class="category-name" data-i18n="category.videogame">Videojogo</span>
+            <span class="category-foot" data-i18n="categories.optional">Opcional</span>
+          </span>
+          <span class="category-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-check"></use>
+            </svg>
+          </span>
+        </button>
+      </section>
+
+      <footer class="category-footer">
+        <span class="selection-count" id="selection-count">2 de 16 categorias</span>
+        <button id="next-to-config" class="btn btn-primary btn-lg" type="button">
+          <span data-i18n="categories.playNow">Jogar agora</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-arrow-right"></use>
+          </svg>
+        </button>
+      </footer>
+    </div>
+  </main>
+
+  <script src="../js/storage.js?v=20261119b"></script>
+  <script src="../js/i18n.js?v=20261119b"></script>
+  <script src="../js/audio.js?v=20261119b"></script>
+  <script src="../js/menu-escolha.js?v=20261120a"></script>
+</body>
+</html>

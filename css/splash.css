@@ -1,0 +1,114 @@
+/* ============================================================
+   Kweha — Ecrã de abertura
+   ============================================================ */
+
+.splash {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  max-width: 760px;
+}
+
+.splash-video {
+  width: min(260px, 46vw, 34vh);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  animation: pop-in 0.7s var(--ease-pop) both;
+}
+
+.splash-video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;
+}
+
+.splash-loader {
+  position: relative;
+  width: min(420px, 82vw);
+  height: 18px;
+  margin-top: 12px;
+  border: 2px solid rgba(16, 42, 67, 0.18);
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(16, 42, 67, 0.05) 0 8px,
+      transparent 8px 16px
+    ),
+    rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(16, 42, 67, 0.1);
+}
+
+.splash-loader-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 16px rgba(255, 122, 24, 0.55);
+  animation: splash-fill 7s linear forwards;
+}
+
+@keyframes splash-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.splash-status {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.splash-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px 18px;
+  border: 2px solid rgba(16, 42, 67, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--navy);
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease-pop), background 0.2s;
+}
+
+.splash-skip svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s;
+}
+
+.splash-skip:hover {
+  background: var(--white);
+  transform: translateY(-2px);
+}
+
+.splash-skip:hover svg {
+  transform: translateX(3px);
+}
+
+@media (max-width: 480px) {
+  .splash {
+    gap: 14px;
+  }
+
+  .splash-video {
+    width: min(210px, 54vw, 30vh);
+  }
+}

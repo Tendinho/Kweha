@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg" />
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg" />
+  <title data-i18n="setup.pageTitle">Kweha — Jogadores</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/player-setup.css" />
+</head>
+<body>
+  <main class="notebook-page">
+    <div class="page setup-page">
+      <header class="top-bar">
+        <button class="btn-back" type="button" onclick="history.back()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-arrow-left"></use>
+          </svg>
+          <span data-i18n="common.back">Voltar</span>
+        </button>
+        <span class="step-pill" data-i18n="setup.step">Passo 1 de 3</span>
+      </header>
+
+      <section class="setup-header">
+        <h1 class="screen-title centered" data-i18n="setup.title">Modo de jogo</h1>
+        <p class="subtitle" data-i18n="setup.subtitle">
+          Multiplayer online para 2 a 4 jogadores. Cria uma sala ou entra com o código de um amigo.
+        </p>
+      </section>
+
+      <section class="mode-selection single">
+        <div class="mode-btn mode-btn-static ativo">
+          <span class="mode-badge" data-i18n="setup.onlineBadge">2–4 jogadores</span>
+          <span class="mode-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <use href="../assets/icons/sprite.svg#i-users"></use>
+            </svg>
+          </span>
+          <span class="mode-name" data-i18n="setup.onlineTitle">Multiplayer online</span>
+          <span class="mode-foot" data-i18n="setup.onlineFoot">Jogar à distância</span>
+        </div>
+      </section>
+
+      <form id="online-form" class="players-form online-form" autocomplete="off">
+        <h2 class="form-title" data-i18n="setup.onlineTitle">Multiplayer online</h2>
+        <p class="form-help" data-i18n="setup.onlineHelp">Cria uma sala para até 4 jogadores ou entra com o código que recebeste. O anfitrião escolhe as categorias e inicia a partida.</p>
+
+        <label class="online-name-field" for="online-name">
+          <span class="player-tag" data-i18n="setup.yourName">O teu nome</span>
+          <input class="input" type="text" id="online-name" data-i18n-placeholder="setup.namePlaceholder" placeholder="Nome do jogador" maxlength="18" required />
+        </label>
+
+        <div class="online-role" role="group" data-i18n-aria-label="setup.roleAria" aria-label="Tipo de sala">
+          <button class="role-btn ativo" id="role-create" type="button" data-role="host">
+            <strong data-i18n="setup.createRoom">Criar sala</strong>
+            <span data-i18n="setup.createRoomDesc">Escolhes as categorias</span>
+          </button>
+          <button class="role-btn" id="role-join" type="button" data-role="guest">
+            <strong data-i18n="setup.joinRoom">Entrar numa sala</strong>
+            <span data-i18n="setup.joinRoomDesc">Usas um código de 5 caracteres</span>
+          </button>
+        </div>
+
+        <label class="online-code-field hidden" id="online-code-field" for="online-code">
+          <span class="player-tag" data-i18n="setup.roomCode">Código da sala</span>
+          <input class="input online-code-input" type="text" id="online-code" placeholder="ABCDE" maxlength="5" autocomplete="off" spellcheck="false" />
+        </label>
+      </form>
+
+      <footer class="setup-footer">
+        <button class="btn btn-primary btn-lg" id="start-btn" type="button" disabled>
+          <span id="start-btn-text" data-i18n="common.chooseCategories">Escolher categorias</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-arrow-right"></use>
+          </svg>
+        </button>
+        <p class="online-note hidden" id="online-note" data-i18n="setup.onlineNote">Precisas de internet para jogar online. Partilha o código da sala com o teu adversário.</p>
+      </footer>
+    </div>
+  </main>
+
+  <script src="../js/storage.js?v=20261119b"></script>
+  <script src="../js/i18n.js?v=20261119b"></script>
+  <script src="../js/audio.js?v=20261119b"></script>
+  <script src="../js/auth.js?v=20261119b"></script>
+  <script src="../js/player-setup.js?v=20261119b"></script>
+</body>
+</html>

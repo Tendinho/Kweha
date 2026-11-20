@@ -1,0 +1,23 @@
+.env
+.env.*
+!.env.example
+
+node_modules/
+npm-debug.log*
+*.log
+
+# Base de dados local criada automaticamente pelo servidor
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+!data/.gitkeep
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~

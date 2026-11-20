@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg" />
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg" />
+  <title data-i18n="splash.pageTitle">Kweha — A carregar</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/splash.css" />
+</head>
+<body>
+  <main class="notebook-page">
+    <div class="page center splash">
+      <div class="splash-video" aria-hidden="true">
+        <video
+          src="../assets/video/kweha-logo.webm"
+          poster="../assets/images/kweha-logo.png"
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+          disablepictureinpicture
+        ></video>
+      </div>
+
+      <div
+        class="splash-loader"
+        id="splash-loader"
+        role="progressbar"
+        data-i18n-aria-label="splash.loaderAria"
+        aria-label="A carregar o jogo"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <div class="splash-loader-fill" id="splash-loader-fill"></div>
+      </div>
+
+      <p class="splash-status" id="splash-status" data-i18n="splash.statusSharpening">A afiar os lápis...</p>
+
+      <button class="splash-skip" id="splash-skip" type="button">
+        <span data-i18n="splash.skip">Saltar introdução</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <use href="../assets/icons/sprite.svg#i-arrow-right"></use>
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <script src="../js/storage.js?v=20261119b"></script>
+  <script src="../js/i18n.js?v=20261119b"></script>
+  <script src="../js/splash.js?v=20261119b"></script>
+</body>
+</html>

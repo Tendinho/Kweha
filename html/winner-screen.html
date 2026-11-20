@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg" />
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg" />
+  <title data-i18n="winner.pageTitle">Kweha — Vencedor</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/winner-screen.css" />
+</head>
+<body>
+  <main class="notebook-page">
+    <div class="page winner-page">
+      <section class="winner-card">
+        <div class="winner-trophy" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <use href="../assets/icons/sprite.svg#i-trophy"></use>
+          </svg>
+        </div>
+
+        <span class="eyebrow" data-i18n="winner.gameOver">Fim de jogo</span>
+        <h1 class="winner-title" id="winner-title" data-i18n="winner.congrats">Parabéns!</h1>
+        <div class="winner-name" id="winner-name" data-i18n="winner.defaultPlayer">Jogador</div>
+        <p class="winner-message">
+          <span id="winner-prefix" data-i18n="winner.winMultiplayerPrefix">Ganhaste o jogo com</span>
+          <strong id="winner-score">0</strong>
+          <span id="winner-suffix" data-i18n="winner.pointsSuffix">pontos!</span>
+        </p>
+
+        <div class="final-scores" id="final-scores"></div>
+
+        <div class="winner-actions">
+          <button id="play-again" class="btn btn-primary" type="button" data-i18n="winner.playAgain">
+            Jogar novamente
+          </button>
+          <button id="back-to-menu" class="btn btn-ghost" type="button" data-i18n="winner.menu">
+            Menu principal
+          </button>
+        </div>
+      </section>
+
+      <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+    </div>
+  </main>
+
+  <script src="../js/storage.js?v=20261119b"></script>
+  <script src="../js/i18n.js?v=20261119b"></script>
+  <script src="../js/audio.js?v=20261119b"></script>
+  <script src="../js/winner-screen.js?v=20261119b"></script>
+</body>
+</html>

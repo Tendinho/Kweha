@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg" />
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg" />
+  <title data-i18n="game.pageTitle">Kweha — Jogo</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/menu-jogo.css" />
+  <link rel="stylesheet" href="../css/online.css" />
+</head>
+<body>
+  <main class="notebook-page">
+    <div class="page game-page">
+      <header class="game-hud">
+        <span class="round-pill" id="round-pill">Ronda 1 de 10</span>
+
+        <div class="timer-box" id="timer-box">
+          <div class="timer-badge">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <use href="../assets/icons/sprite.svg#i-timer"></use>
+            </svg>
+            <span class="timer" id="timer">2:00</span>
+          </div>
+          <div class="timer-track" aria-hidden="true">
+            <div class="timer-fill" id="timer-fill"></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="letter-stage">
+        <p class="letter-caption" data-i18n="game.letterCaption">Letra sorteada</p>
+        <div class="letter-display" id="current-letter" aria-live="polite">A</div>
+        <p class="letter-hint" id="turn-hint" data-i18n="game.letterHint">Escreve uma palavra por categoria começando por esta letra.</p>
+      </section>
+
+      <section class="answer-sheet" data-i18n-aria-label="game.answersAria" aria-label="Respostas">
+        <div class="categories-header" id="categories-header"></div>
+        <div class="category-inputs" id="category-inputs"></div>
+      </section>
+
+      <section class="scoreboard" id="scoreboard">
+        <div class="scoreboard-head">
+          <h2 data-i18n="game.scoreboard">Placar</h2>
+          <span class="scoreboard-note" data-i18n="game.scoreboardNote">Ronda atual</span>
+        </div>
+        <div id="scores-container"></div>
+      </section>
+
+      <footer class="game-actions">
+        <button id="surrender-btn" class="btn btn-ghost" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-flag"></use>
+          </svg>
+          <span data-i18n="game.surrender">Desistir</span>
+        </button>
+
+        <button id="submit-answers" class="btn btn-primary btn-lg stop-btn" type="button" data-no-click-sound>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-check"></use>
+          </svg>
+          <span data-i18n="game.stop">STOP!</span>
+        </button>
+      </footer>
+    </div>
+  </main>
+
+  <aside class="live-progress hidden" id="live-progress" aria-live="polite">
+    <span class="live-progress-dot" aria-hidden="true"></span>
+    <span id="live-progress-text">Preenchidas: 0/8</span>
+  </aside>
+
+  <div class="game-modal hidden" id="surrender-modal" role="dialog" aria-modal="true" aria-labelledby="surrender-title">
+    <div class="game-modal-card">
+      <h2 class="game-modal-title" id="surrender-title" data-i18n="game.surrenderTitle">Desistir da partida?</h2>
+      <p class="game-modal-subtitle" id="surrender-message" data-i18n="game.surrenderConfirm">
+        Tens a certeza que queres desistir? O oponente será declarado vencedor.
+      </p>
+      <div class="confirm-modal-actions">
+        <button class="btn btn-ghost" id="surrender-cancel" type="button" data-i18n="common.cancel">Cancelar</button>
+        <button class="btn btn-danger" id="surrender-confirm" type="button" data-i18n="game.surrenderConfirmBtn">Desistir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="online-overlay hidden" id="online-overlay">
+    <div class="game-modal-card online-card" role="dialog" aria-modal="true" aria-labelledby="online-title">
+      <h2 class="game-modal-title" id="online-title" data-i18n="game.onlineTitle">Sala online</h2>
+      <p class="game-modal-subtitle" id="online-subtitle" data-i18n="game.onlinePreparing">A preparar a ligação...</p>
+
+      <div class="online-panel hidden" id="online-host-panel">
+        <span class="online-label" data-i18n="game.roomCode">Código da sala</span>
+        <div class="online-code" id="online-code-display">-----</div>
+        <button class="btn btn-ghost btn-sm" id="copy-code-btn" type="button" data-i18n="online.copyCode">Copiar código</button>
+      </div>
+
+      <form class="online-panel hidden" id="online-guest-panel">
+        <label class="online-label" for="online-code-input" data-i18n="game.roomCode">Código da sala</label>
+        <input class="input online-code-input" id="online-code-input" type="text" maxlength="5" placeholder="ABCDE" autocomplete="off" spellcheck="false" />
+        <button class="btn btn-primary" id="join-room-btn" type="submit" data-i18n="game.joinRoom">Entrar na sala</button>
+      </form>
+
+      <div class="online-lobby hidden" id="online-lobby">
+        <span class="online-label" id="online-players-label">0/4 jogadores na sala</span>
+        <ul class="online-player-list" id="online-player-list"></ul>
+        <button class="btn btn-primary btn-lg hidden" id="start-online-btn" type="button" data-i18n="online.startMatch">
+          Começar partida
+        </button>
+      </div>
+
+      <p class="online-status" id="online-status" role="status" data-i18n="game.connecting">A ligar...</p>
+
+      <div class="online-actions">
+        <button class="btn btn-ghost" id="cancel-online-btn" type="button" data-i18n="common.cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/storage.js?v=20261119b"></script>
+  <script src="../js/i18n.js?v=20261119b"></script>
+  <script src="../js/words.js?v=20261119b"></script>
+  <script src="../js/audio.js?v=20261119b"></script>
+  <script src="../js/auth.js?v=20261119b"></script>
+  <script src="../js/menu-jogo.js?v=20261120a"></script>
+  <script src="../js/online-game.js?v=20261120a"></script>
+</body>
+</html>

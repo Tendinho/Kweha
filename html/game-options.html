@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1024" />
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg" />
+  <link rel="apple-touch-icon" href="../assets/icons/app-icon.svg" />
+  <title data-i18n="options.pageTitle">Kweha — Definições</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/opcoes.css" />
+</head>
+<body>
+  <main class="notebook-page">
+    <div class="page options-page">
+      <header class="top-bar">
+        <button id="back-to-main" class="btn-back" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <use href="../assets/icons/sprite.svg#i-arrow-left"></use>
+          </svg>
+          <span data-i18n="common.back">Voltar</span>
+        </button>
+        <span class="step-pill" data-i18n="options.step">Definições</span>
+      </header>
+
+      <section class="options-header">
+        <h1 class="screen-title centered" data-i18n="options.title">Definições</h1>
+        <p class="subtitle" data-i18n="options.subtitle">Ajusta o som e o idioma. As escolhas ficam guardadas automaticamente neste dispositivo.</p>
+      </section>
+
+      <div id="settings-menu" class="settings-menu">
+        <section class="settings-option">
+          <div class="settings-label">
+            <span class="settings-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <use href="../assets/icons/sprite.svg#i-globe"></use>
+              </svg>
+            </span>
+            <div>
+              <span data-i18n="options.language">Idioma</span>
+              <small data-i18n="options.languageHelp">Escolhe o idioma da interface</small>
+            </div>
+          </div>
+
+          <div class="language-options">
+            <button class="language-option" type="button" data-lang="pt">Português</button>
+            <button class="language-option" type="button" data-lang="en">English</button>
+            <button class="language-option" type="button" data-lang="es">Español</button>
+            <button class="language-option" type="button" data-lang="fr">Français</button>
+          </div>
+        </section>
+
+        <section class="settings-option">
+          <div class="settings-label">
+            <span class="settings-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <use href="../assets/icons/sprite.svg#i-sound-on"></use>
+              </svg>
+            </span>
+            <div>
+              <span data-i18n="options.sound">Som</span>
+              <small data-i18n="options.soundHelp">Efeitos sonoros do jogo</small>
+            </div>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" id="sound-toggle" checked />
+            <span class="slider"></span>
+          </label>
+        </section>
+
+        <section class="settings-option">
+          <div class="settings-label">
+            <span class="settings-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <use href="../assets/icons/sprite.svg#i-volume"></use>
+              </svg>
+            </span>
+            <div>
+              <span data-i18n="options.volume">Volume</span>
+              <small data-i18n="options.volumeHelp">Define o nível dos sons</small>
+            </div>
+          </div>
+
+          <div class="volume-controls">
+            <button id="volume-down" class="btn-volume" type="button" data-i18n-aria-label="options.volumeDown" aria-label="Diminuir volume">-</button>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5" data-i18n-aria-label="options.volumeAria" aria-label="Volume" />
+            <button id="volume-up" class="btn-volume" type="button" data-i18n-aria-label="options.volumeUp" aria-label="Aumentar volume">+</button>
+            <span id="volume-value">50%</span>
+          </div>
+        </section>
+      </div>
+
+      <footer class="options-footer">
+        <span class="sticker" data-i18n="options.footer">As definições são guardadas automaticamente</span>
+      </footer>
+    </div>
+  </main>
+
+  <script src="../js/storage.js?v=20261119b"></script>
+  <script src="../js/i18n.js?v=20261119b"></script>
+  <script src="../js/audio.js?v=20261119b"></script>
+  <script src="../js/opcoes.js?v=20261119b"></script>
+</body>
+</html>
