@@ -101,11 +101,16 @@ sudo apt install -y caddy
 ## 6. Colocar o projeto na VPS
 
 ```bash
-sudo useradd --system --create-home --home-dir /opt/kweha --shell /usr/sbin/nologin kweha
+sudo useradd --system --home-dir /opt/kweha --shell /usr/sbin/nologin kweha
+sudo mkdir -p /opt/kweha
+sudo chown kweha:kweha /opt/kweha
 sudo -u kweha git clone https://github.com/UTILIZADOR/REPO.git /opt/kweha
 sudo -u kweha cp /opt/kweha/.env.example /opt/kweha/.env
 sudo -u kweha nano /opt/kweha/.env
 ```
+
+Se o repositório for privado, cria uma deploy key no GitHub e usa o URL SSH do
+repositório em vez do URL HTTPS.
 
 Conteúdo do `.env` em produção:
 
