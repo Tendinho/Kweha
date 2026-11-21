@@ -6,6 +6,10 @@ node_modules/
 npm-debug.log*
 *.log
 
+# Túnel temporário para jogar com amigos
+cloudflared.exe
+.publicar.pid
+
 # Base de dados local criada automaticamente pelo servidor
 data/*.db
 data/*.db-journal

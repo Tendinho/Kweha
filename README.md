@@ -29,6 +29,25 @@ Para desenvolvimento com reinício automático:
 npm run dev
 ```
 
+## Jogar com amigos agora (link temporário)
+
+No Windows, faz duplo clique em `publicar.bat`. O script:
+
+1. descarrega o `cloudflared` na primeira utilização;
+2. arranca o servidor Kweha (ou reutiliza um que já esteja a correr);
+3. cria um link HTTPS público `https://....trycloudflare.com`;
+4. abre o link no navegador.
+
+O `publicar.ps1` respeita `PORT` e `HOST` definidos no `.env`. Se fechares a janela,
+apenas o túnel termina; um servidor que já estivesse a correr continua ativo.
+
+Partilha esse link com os outros jogadores e mantém a janela aberta. O endereço muda
+cada vez que executas o script e só funciona enquanto o teu PC e a janela estiverem
+ligados. Para terminar, fecha a janela ou executa `parar-publicar.bat`.
+
+Este modo usa o Cloudflare Quick Tunnel, é gratuito e não precisa de conta. Para um
+endereço fixo e sempre online, usa a VPS descrita em [DEPLOY.md](DEPLOY.md).
+
 ## Modos de jogo
 
 ### Offline / Com PC
@@ -79,6 +98,24 @@ a funcionar.
 
 ## Publicar num repositório / hosting
 
+### Render (grátis, mais rápido para testar)
+
+O ficheiro `render.yaml` já configura tudo (Node 24, `HOST=0.0.0.0`,
+`COOKIE_SECURE=1`, health check em `/api/health`).
+
+1. Faz push do repositório para o GitHub.
+2. Em <https://dashboard.render.com> escolhe **New > Blueprint**, liga a conta GitHub
+   e seleciona o repositório `Kweha`.
+3. Confirma o serviço `kweha` e espera pelo primeiro deploy.
+4. Abre o URL `https://kweha-....onrender.com` e partilha-o com os outros jogadores.
+
+Limitações do plano gratuito:
+
+- a instância adormece após ~15 minutos sem tráfego; o primeiro acesso depois disso
+  demora cerca de um minuto a acordar;
+- o disco é temporário, por isso contas e estatísticas são apagadas em cada deploy ou
+  reinício. Para dados permanentes, usa a VPS descrita em [DEPLOY.md](DEPLOY.md).
+
 ### Servidor Node.js (recomendado para tudo)
 
 Funciona em Render, Railway, Fly.io, VPS, Docker, etc.
@@ -122,6 +159,9 @@ Se precisares de contas e estatísticas, publica com o servidor Node.js.
 ├── data/                 # base de dados SQLite (gerada em runtime)
 ├── deploy/               # systemd, Caddyfile e guia de VPS
 ├── server/server.js      # servidor HTTP, API de autenticação e ficheiros estáticos
+├── publicar.bat          # link público temporário no Windows
+├── parar-publicar.bat    # encerra o servidor e o túnel temporário
+├── render.yaml           # deploy gratuito no Render (Blueprint)
 ├── .env.example          # exemplo de configuração
 ├── DEPLOY.md             # publicação no GitHub + Oracle Cloud + DuckDNS
 └── package.json
