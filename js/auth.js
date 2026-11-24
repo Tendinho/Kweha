@@ -54,11 +54,19 @@
     return 'Convidado';
   }
 
-  async function request(path, options = {}) {
+  async function request(path, options = {}, attempt = 0) {
     const headers = Object.assign(
       { Accept: 'application/json' },
       options.headers || {}
     );
+
+    const controller =
+      typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = controller
+      ? window.setTimeout(function () {
+          controller.abort();
+        }, 25000)
+      : null;
 
     let response;
 
@@ -67,14 +75,26 @@
         credentials: 'same-origin',
         cache: 'no-store',
         ...options,
-        headers
+        headers,
+        signal: controller ? controller.signal : undefined
       });
     } catch (error) {
+      // A instância gratuita do Render pode estar a acordar. Uma nova
+      // tentativa resolve o primeiro pedido lento sem mostrar erro ao jogador.
+      if (attempt < 1 && path !== '/register' && path !== '/game') {
+        await new Promise(function (resolve) {
+          window.setTimeout(resolve, 1800);
+        });
+        return request(path, options, attempt + 1);
+      }
+
       throw new Error(
         window.I18N
           ? window.I18N.t('server.unavailable')
           : 'Não foi possível ligar ao servidor. Verifica se o servidor está a correr.'
       );
+    } finally {
+      if (timer) window.clearTimeout(timer);
     }
 
     let data = null;

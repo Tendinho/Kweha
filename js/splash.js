@@ -6,7 +6,7 @@
   'use strict';
 
   const DURATION = 7000;
-  const NEXT_PAGE = 'main-menu.html';
+  const NEXT_PAGE = '/menu';
 
   const loader = document.getElementById('splash-loader');
   const status = document.getElementById('splash-status');

@@ -8,8 +8,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const MAX_ROUNDS = ROUND_OPTIONS.includes(storedRounds) ? storedRounds : 10;
   const ROUND_TIME = 120;
   const ALLOWED_CATEGORIES = [
-    'name', 'country', 'animal', 'fruit', 'color', 'object', 'city', 'movie',
-    'anime', 'football', 'novela', 'series', 'sport', 'brand', 'profession', 'videogame'
+    'name', 'country', 'animal', 'fruit', 'color', 'object', 'city', 'food',
+    'movie', 'anime', 'football', 'novela', 'series', 'sport', 'brand',
+    'profession', 'videogame'
   ];
 
   const PORTUGUESE_DICTIONARIES = {
@@ -256,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
       color: 'Cor',
       object: 'Objeto',
       city: 'Cidade',
+      food: 'Comida',
       movie: 'Filme',
       anime: 'Anime',
       football: 'Equipa de futebol',
@@ -302,6 +304,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function startsWithLetter(text) {
     return normalize(text).startsWith(normalize(currentLetter));
+  }
+
+  function sameAnswer(category, a, b) {
+    const helper = window.KwehaText;
+    if (helper && typeof helper.matchesEntry === 'function') {
+      return (
+        helper.matchesEntry(category, a, b) ||
+        helper.matchesEntry(category, b, a)
+      );
+    }
+
+    return normalize(a) === normalize(b);
   }
 
   function startGame() {
@@ -577,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      if (normalize(playerAnswer) === normalize(computerAnswer)) {
+      if (sameAnswer(category, playerAnswer, computerAnswer)) {
         playerPoints += 5;
         computerPoints += 5;
       } else {
@@ -795,7 +809,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    window.location.href = 'winner-screen.html';
+    window.location.href = '/winner';
   }
 
   async function surrenderGame() {

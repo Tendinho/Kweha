@@ -63,17 +63,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (gameMode === 'online') {
       localStorage.removeItem('gameResults');
-      window.location.href = 'player-setup.html';
+      window.location.href = '/setup';
       return;
     }
 
     resetForNewGame();
-    window.location.href = 'game-screen.html';
+    window.location.href = '/game';
   });
 
   backToMenuBtn.addEventListener('click', function () {
     if (window.SoundManager) window.SoundManager.play('button');
-    window.location.href = 'main-menu.html';
+    window.location.href = '/menu';
   });
 
   function loadResults() {

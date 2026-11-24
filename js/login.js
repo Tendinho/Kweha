@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const user = await auth.login(email, password);
       setNote(tr('login.sessionStarted', { name: user.name }), 'success');
       window.setTimeout(function () {
-        window.location.href = 'main-menu.html';
+        window.location.href = '/menu';
       }, 550);
     } catch (error) {
       busy = false;
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const user = await auth.register(name, email, password);
       setNote(tr('login.accountCreated', { name: user.name }), 'success');
       window.setTimeout(function () {
-        window.location.href = 'main-menu.html';
+        window.location.href = '/menu';
       }, 650);
     } catch (error) {
       busy = false;
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
       await auth.logout();
     } finally {
       localStorage.removeItem('onlinePlayerName');
-      window.location.href = 'main-menu.html';
+      window.location.href = '/menu';
     }
   }
 
@@ -279,6 +279,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   backBtn.addEventListener('click', function () {
     playButtonSound();
-    window.location.href = 'main-menu.html';
+    window.location.href = '/menu';
   });
 });

@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
   updateCount();
 
   if (gameMode === 'online' && localStorage.getItem('onlineRole') === 'guest') {
-    window.location.href = 'game-screen.html';
+    window.location.href = '/game';
     return;
   }
 
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
       window.SoundManager.play('start');
     }
 
-    window.location.href = 'game-screen.html';
+    window.location.href = '/game';
   });
 
   backBtn.addEventListener('click', function () {
@@ -180,10 +180,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentMode = localStorage.getItem('gameMode') || 'computer';
 
     if (currentMode === 'online') {
-      window.location.href = 'player-setup.html';
+      window.location.href = '/setup';
       return;
     }
 
-    window.location.href = 'main-menu.html';
+    window.location.href = '/menu';
   });
 });

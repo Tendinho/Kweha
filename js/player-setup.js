@@ -57,10 +57,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateStartButton() {
-    const nomePreenchido = onlineName.value.trim().length > 0;
     const codigoPreenchido = onlineRole === 'host' || onlineCode.value.trim().length === 5;
 
-    startBtn.disabled = !(nomePreenchido && codigoPreenchido);
+    startBtn.disabled = !codigoPreenchido;
     startBtnText.textContent = tr(
       onlineRole === 'host' ? 'setup.createRoomBtn' : 'setup.joinRoomBtn'
     );
@@ -83,21 +82,15 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function startOnlineGame() {
-    const nome = onlineName.value.trim();
-
-    if (!nome) {
-      alert(tr('setup.fillYourName'));
-      onlineName.focus();
-      return;
-    }
+    const nome = (onlineName.value.trim() || tr('common.player')).slice(0, 18);
 
     if (onlineRole === 'host') {
       localStorage.setItem('gameMode', 'online');
       localStorage.setItem('onlineRole', 'host');
-      localStorage.setItem('onlinePlayerName', nome.slice(0, 18));
+      localStorage.setItem('onlinePlayerName', nome);
       localStorage.removeItem('onlineRoomCode');
       playStartSound();
-      window.location.href = 'category-select.html';
+      window.location.href = '/categories';
       return;
     }
 
@@ -111,10 +104,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     localStorage.setItem('gameMode', 'online');
     localStorage.setItem('onlineRole', 'guest');
-    localStorage.setItem('onlinePlayerName', nome.slice(0, 18));
+    localStorage.setItem('onlinePlayerName', nome);
     localStorage.setItem('onlineRoomCode', codigo);
     playStartSound();
-    window.location.href = 'game-screen.html';
+    window.location.href = '/game';
   }
 
   roleCreate.addEventListener('click', function () {

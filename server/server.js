@@ -42,6 +42,16 @@ const config = {
   }
 };
 
+// Relay WebSocket alojado no próprio processo. Funciona atrás de proxies
+// (Render, Cloudflare, Caddy, etc.) e não depende de WebRTC/TURN, pelo que a
+// entrada nas salas deixa de falhar em redes restritivas.
+const RELAY_PATH = '/ws/relay';
+const RELAY_MAX_GUESTS = 3;
+const RELAY_MAX_MESSAGE_BYTES = 64 * 1024;
+const RELAY_HEARTBEAT_MS = 30000;
+const relayRooms = new Map();
+let relayServer = null;
+
 const GOOGLE_TOKEN_URL =
   process.env.GOOGLE_TOKEN_URL || 'https://oauth2.googleapis.com/token';
 const GOOGLE_USERINFO_URL =
@@ -128,6 +138,16 @@ const MIME_TYPES = {
 };
 
 const BLOCKED_STATIC_PATHS = ['/data', '/server', '/.env', '/.git', '/node_modules'];
+const PAGE_ROUTES = new Map([
+  ['/', 'html/index.html'],
+  ['/login', 'html/login.html'],
+  ['/menu', 'html/main-menu.html'],
+  ['/options', 'html/game-options.html'],
+  ['/setup', 'html/player-setup.html'],
+  ['/categories', 'html/category-select.html'],
+  ['/game', 'html/game-screen.html'],
+  ['/winner', 'html/winner-screen.html']
+]);
 const loginAttempts = new Map();
 
 const PLACEHOLDER_VALUE = /^(?:\.{3,}|x{3,}|abc123|changeme|change-me|placeholder|example|exemplo|your[-_ ].*)$/i;
@@ -162,6 +182,17 @@ function firstHeaderValue(value) {
   return String(value || '').split(',')[0].trim();
 }
 
+function isSecureRequest(req) {
+  const forwardedProto = firstHeaderValue(req.headers['x-forwarded-proto']).toLowerCase();
+  if (forwardedProto === 'https') return true;
+  if (forwardedProto === 'http') return false;
+  return Boolean(req.socket && req.socket.encrypted);
+}
+
+function cookieSecure(req) {
+  return isSecureRequest(req) || COOKIE_SECURE;
+}
+
 function getRequestOrigin(req) {
   const forwardedHost = firstHeaderValue(req.headers['x-forwarded-host']);
   const host = forwardedHost || req.headers.host || `localhost:${PORT}`;
@@ -190,6 +221,17 @@ function configuredRedirectUri() {
 function getRedirectUri(req) {
   const configured = configuredRedirectUri();
   if (configured) return configured;
+
+  // Render define RENDER_EXTERNAL_URL automaticamente. PUBLIC_URL permite
+  // fixar o domínio em qualquer hosting (VPS, Railway, Fly.io, etc.).
+  const publicUrl = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL || '';
+  if (publicUrl) {
+    try {
+      return `${new URL(publicUrl).origin}/api/auth/google/callback`;
+    } catch (error) {
+      /* valor inválido: usa a origem do pedido abaixo */
+    }
+  }
 
   const origin = getRequestOrigin(req);
   let hostname;
@@ -261,11 +303,12 @@ function serializeCookie(name, value, options = {}) {
   return parts.join('; ');
 }
 
-function clearCookie(name, cookiePath = '/') {
+function clearCookie(name, cookiePath = '/', req) {
   return serializeCookie(name, '', {
     path: cookiePath,
     maxAge: 0,
-    expires: 0
+    expires: 0,
+    secure: req ? cookieSecure(req) : COOKIE_SECURE
   });
 }
 
@@ -374,9 +417,10 @@ function createSession(userId) {
   return token;
 }
 
-function sessionCookie(token) {
+function sessionCookie(token, req) {
   return serializeCookie(SESSION_COOKIE, token, {
-    maxAge: SESSION_TTL_MS / 1000
+    maxAge: SESSION_TTL_MS / 1000,
+    secure: req ? cookieSecure(req) : COOKIE_SECURE
   });
 }
 
@@ -408,8 +452,13 @@ function destroySession(req) {
   }
 }
 
+function clientAddress(req) {
+  const forwarded = firstHeaderValue(req.headers['x-forwarded-for']);
+  return forwarded || req.socket.remoteAddress || 'desconhecido';
+}
+
 function allowLoginAttempt(req) {
-  const ip = req.socket.remoteAddress || 'desconhecido';
+  const ip = clientAddress(req);
   const now = Date.now();
   const windowMs = 10 * 60 * 1000;
   const entry = loginAttempts.get(ip) || { count: 0, resetAt: now + windowMs };
@@ -513,7 +562,7 @@ async function register(req, res) {
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(Number(result.lastInsertRowid));
   const token = createSession(user.id);
 
-  sendJson(res, 201, { user: publicUser(user) }, { 'Set-Cookie': sessionCookie(token) });
+  sendJson(res, 201, { user: publicUser(user) }, { 'Set-Cookie': sessionCookie(token, req) });
 }
 
 async function login(req, res) {
@@ -548,7 +597,7 @@ async function login(req, res) {
   }
 
   const token = createSession(user.id);
-  sendJson(res, 200, { user: publicUser(user) }, { 'Set-Cookie': sessionCookie(token) });
+  sendJson(res, 200, { user: publicUser(user) }, { 'Set-Cookie': sessionCookie(token, req) });
 }
 
 async function updateProfile(req, res) {
@@ -609,11 +658,12 @@ async function recordGame(req, res) {
   sendJson(res, 200, { user: publicUser(user) });
 }
 
-function oauthStateCookie(state) {
+function oauthStateCookie(state, req) {
   return serializeCookie(OAUTH_STATE_COOKIE, state, {
     path: '/api/auth',
     maxAge: OAUTH_STATE_TTL_MS / 1000,
-    sameSite: 'Lax'
+    sameSite: 'Lax',
+    secure: req ? cookieSecure(req) : COOKIE_SECURE
   });
 }
 
@@ -632,7 +682,7 @@ function isExpectedState(state, expectedState, provider) {
 
 function startGoogleOAuth(req, res) {
   if (!providerAvailable('google')) {
-    redirect(res, '/html/login.html?error=google_not_configured');
+    redirect(res, '/login?error=google_not_configured');
     return;
   }
 
@@ -644,7 +694,7 @@ function startGoogleOAuth(req, res) {
 
   const redirectUri = getRedirectUri(req);
   if (!redirectUri) {
-    redirect(res, '/html/login.html?error=redirect_not_configured');
+    redirect(res, '/login?error=redirect_not_configured');
     return;
   }
 
@@ -660,12 +710,12 @@ function startGoogleOAuth(req, res) {
   });
 
   redirect(res, `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`, {
-    'Set-Cookie': oauthStateCookie(state)
+    'Set-Cookie': oauthStateCookie(state, req)
   });
 }
 
 async function handleGoogleCallback(req, res, url) {
-  const clearState = clearCookie(OAUTH_STATE_COOKIE, '/api/auth');
+  const clearState = clearCookie(OAUTH_STATE_COOKIE, '/api/auth', req);
   const oauthError = url.searchParams.get('error');
 
   if (oauthError) {
@@ -677,7 +727,7 @@ async function handleGoogleCallback(req, res, url) {
         url.searchParams.get('error_description') || ''
       );
     }
-    redirect(res, `/html/login.html?error=${errorCode}`, { 'Set-Cookie': clearState });
+    redirect(res, `/login?error=${errorCode}`, { 'Set-Cookie': clearState });
     return;
   }
 
@@ -686,13 +736,13 @@ async function handleGoogleCallback(req, res, url) {
   const expectedState = parseCookies(req)[OAUTH_STATE_COOKIE] || '';
 
   if (!isExpectedState(state, expectedState, 'google') || !code) {
-    redirect(res, '/html/login.html?error=oauth_state', { 'Set-Cookie': clearState });
+    redirect(res, '/login?error=oauth_state', { 'Set-Cookie': clearState });
     return;
   }
 
   const redirectUri = getRedirectUri(req);
   if (!redirectUri) {
-    redirect(res, '/html/login.html?error=redirect_not_configured', {
+    redirect(res, '/login?error=redirect_not_configured', {
       'Set-Cookie': clearState
     });
     return;
@@ -746,12 +796,12 @@ async function handleGoogleCallback(req, res, url) {
     destroySession(req);
     const token = createSession(user.id);
 
-    redirect(res, '/html/main-menu.html', {
-      'Set-Cookie': [clearState, sessionCookie(token)]
+    redirect(res, '/menu', {
+      'Set-Cookie': [clearState, sessionCookie(token, req)]
     });
   } catch (error) {
     console.error('Google OAuth:', error);
-    redirect(res, '/html/login.html?error=oauth_failed', { 'Set-Cookie': clearState });
+    redirect(res, '/login?error=oauth_failed', { 'Set-Cookie': clearState });
   }
 }
 
@@ -759,7 +809,8 @@ async function handleAuth(req, res, url, pathname) {
   if (pathname === '/api/health' && req.method === 'GET') {
     sendJson(res, 200, {
       ok: true,
-      uptime: Math.round(process.uptime())
+      uptime: Math.round(process.uptime()),
+      relay: Boolean(relayServer)
     });
     return;
   }
@@ -803,7 +854,7 @@ async function handleAuth(req, res, url, pathname) {
 
   if (pathname === '/api/auth/logout' && req.method === 'POST') {
     destroySession(req);
-    sendJson(res, 200, { ok: true }, { 'Set-Cookie': clearCookie(SESSION_COOKIE) });
+    sendJson(res, 200, { ok: true }, { 'Set-Cookie': clearCookie(SESSION_COOKIE, '/', req) });
     return;
   }
 
@@ -915,10 +966,286 @@ async function serveStatic(req, res, pathname) {
   stream.pipe(res);
 }
 
+function relaySend(socket, payload) {
+  if (!socket || socket.readyState !== 1) return;
+  try {
+    socket.send(JSON.stringify(payload));
+  } catch (error) {
+    /* a ligação foi fechada entretanto */
+  }
+}
+
+function relayError(socket, code) {
+  relaySend(socket, { t: 'error', code });
+}
+
+function normalizeRelayRoom(value) {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 5);
+}
+
+function sanitizeRelayName(value) {
+  const name = String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 18);
+  return name || 'Jogador';
+}
+
+function cleanupRelaySocket(socket) {
+  const meta = socket.meta || {};
+  if (!meta.role || !meta.room) return;
+
+  socket.meta = { role: null, room: null, id: null };
+  const roomState = relayRooms.get(meta.room);
+  if (!roomState) return;
+
+  if (meta.role === 'host' && roomState.host === socket) {
+    relayRooms.delete(meta.room);
+    roomState.guests.forEach(function (guest) {
+      relaySend(guest.socket, { t: 'hostLeft' });
+      try {
+        guest.socket.close(4000, 'host-left');
+      } catch (error) {
+        /* ignorar */
+      }
+    });
+    return;
+  }
+
+  if (meta.role === 'guest' && roomState.guests.has(meta.id)) {
+    roomState.guests.delete(meta.id);
+    relaySend(roomState.host, { t: 'peerLeave', id: meta.id });
+  }
+}
+
+function handleRelayMessage(socket, raw) {
+  if (!raw || raw.length > RELAY_MAX_MESSAGE_BYTES) {
+    relayError(socket, 'invalid');
+    return;
+  }
+
+  let message;
+  try {
+    message = JSON.parse(raw.toString());
+  } catch (error) {
+    relayError(socket, 'invalid');
+    return;
+  }
+
+  if (!message || typeof message.t !== 'string') {
+    relayError(socket, 'invalid');
+    return;
+  }
+
+  if (message.t === 'ping') {
+    relaySend(socket, { t: 'pong' });
+    return;
+  }
+
+  const meta = socket.meta || {};
+
+  if (message.t === 'host') {
+    if (meta.role) {
+      relayError(socket, 'already-joined');
+      return;
+    }
+
+    const room = normalizeRelayRoom(message.room);
+    if (room.length !== 5) {
+      relayError(socket, 'invalid');
+      return;
+    }
+
+    if (relayRooms.has(room)) {
+      relayError(socket, 'room-exists');
+      return;
+    }
+
+    relayRooms.set(room, {
+      code: room,
+      host: socket,
+      hostName: sanitizeRelayName(message.name),
+      guests: new Map()
+    });
+    socket.meta = { role: 'host', room: room, id: 'host' };
+    relaySend(socket, { t: 'hosted', room: room });
+    return;
+  }
+
+  if (message.t === 'join') {
+    if (meta.role) {
+      relayError(socket, 'already-joined');
+      return;
+    }
+
+    const room = normalizeRelayRoom(message.room);
+    if (room.length !== 5) {
+      relayError(socket, 'invalid');
+      return;
+    }
+
+    const roomState = relayRooms.get(room);
+    if (!roomState) {
+      relayError(socket, 'not-found');
+      return;
+    }
+
+    if (roomState.guests.size >= RELAY_MAX_GUESTS) {
+      relayError(socket, 'full');
+      return;
+    }
+
+    const id = `g-${crypto.randomBytes(6).toString('hex')}`;
+    const name = sanitizeRelayName(message.name);
+    roomState.guests.set(id, { socket: socket, name: name });
+    socket.meta = { role: 'guest', room: room, id: id };
+    relaySend(socket, { t: 'joined', id: id, hostName: roomState.hostName });
+    relaySend(roomState.host, { t: 'peerJoin', id: id, name: name });
+    return;
+  }
+
+  if (message.t === 'msg') {
+    const data = message.data;
+    if (!data || typeof data !== 'object') {
+      relayError(socket, 'invalid');
+      return;
+    }
+
+    const roomState = relayRooms.get(meta.room);
+    if (!roomState) {
+      relayError(socket, 'not-found');
+      return;
+    }
+
+    if (meta.role === 'host') {
+      if (message.to) {
+        const guest = roomState.guests.get(String(message.to));
+        if (guest) relaySend(guest.socket, { t: 'msg', from: 'host', data: data });
+        return;
+      }
+
+      roomState.guests.forEach(function (guest) {
+        relaySend(guest.socket, { t: 'msg', from: 'host', data: data });
+      });
+      return;
+    }
+
+    if (meta.role === 'guest') {
+      relaySend(roomState.host, { t: 'msg', from: meta.id, data: data });
+      return;
+    }
+  }
+
+  if (message.t === 'leave') {
+    cleanupRelaySocket(socket);
+    try {
+      socket.close(1000, 'leave');
+    } catch (error) {
+      /* ignorar */
+    }
+    return;
+  }
+
+  relayError(socket, 'invalid');
+}
+
+function setupRelayServer() {
+  let WebSocketServer;
+
+  try {
+    ({ WebSocketServer } = require('ws'));
+  } catch (error) {
+    console.warn(
+      'Relay online: módulo ws indisponível; o multiplayer usará PeerJS.',
+      error && error.message ? error.message : error
+    );
+    return;
+  }
+
+  relayServer = new WebSocketServer({
+    noServer: true,
+    maxPayload: RELAY_MAX_MESSAGE_BYTES
+  });
+
+  relayServer.on('connection', function (socket) {
+    socket.meta = { role: null, room: null, id: null };
+    socket.isAlive = true;
+    socket.on('pong', function () {
+      socket.isAlive = true;
+    });
+    socket.on('message', function (raw) {
+      handleRelayMessage(socket, raw);
+    });
+    socket.on('close', function () {
+      cleanupRelaySocket(socket);
+    });
+    socket.on('error', function () {
+      cleanupRelaySocket(socket);
+    });
+  });
+
+  const heartbeat = setInterval(function () {
+    relayServer.clients.forEach(function (socket) {
+      if (socket.isAlive === false) {
+        socket.terminate();
+        return;
+      }
+      socket.isAlive = false;
+      try {
+        socket.ping();
+      } catch (error) {
+        /* ignorar */
+      }
+    });
+  }, RELAY_HEARTBEAT_MS);
+
+  if (typeof heartbeat.unref === 'function') heartbeat.unref();
+
+  relayServer.on('close', function () {
+    clearInterval(heartbeat);
+  });
+
+  server.on('upgrade', function (req, socket, head) {
+    let pathname;
+
+    try {
+      pathname = new URL(req.url, 'http://localhost').pathname;
+    } catch (error) {
+      socket.destroy();
+      return;
+    }
+
+    if (pathname !== RELAY_PATH || !relayServer) {
+      socket.destroy();
+      return;
+    }
+
+    relayServer.handleUpgrade(req, socket, head, function (ws) {
+      relayServer.emit('connection', ws, req);
+    });
+  });
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = url.pathname;
+
+    if (
+      COOKIE_SECURE &&
+      (req.method === 'GET' || req.method === 'HEAD') &&
+      !pathname.startsWith('/api/') &&
+      !isSecureRequest(req)
+    ) {
+      const host = firstHeaderValue(req.headers['x-forwarded-host']) || req.headers.host || '';
+      if (host && !isLoopbackHost(host.split(':')[0])) {
+        redirect(res, `https://${host}${req.url}`);
+        return;
+      }
+    }
 
     if (pathname === '/api' || pathname.startsWith('/api/')) {
       await handleAuth(req, res, url, pathname);
@@ -927,6 +1254,23 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       sendError(res, 405, 'Método não permitido.');
+      return;
+    }
+
+    const page = PAGE_ROUTES.get(pathname);
+    if (page) {
+      await serveStatic(req, res, `/${page}`);
+      return;
+    }
+
+    if (pathname === '/index.html') {
+      redirect(res, '/');
+      return;
+    }
+
+    const lowerPath = pathname.toLowerCase();
+    if (lowerPath === '/html' || lowerPath.startsWith('/html/')) {
+      notFound(res);
       return;
     }
 
@@ -958,10 +1302,15 @@ server.on('error', (error) => {
   process.exit(1);
 });
 
+setupRelayServer();
+
 server.listen(PORT, HOST, () => {
   const displayHost = HOST === '0.0.0.0' || HOST === '::' ? 'localhost' : HOST;
   console.log(`Kweha disponível em http://${displayHost}:${PORT}`);
   console.log(`Base de dados: ${DB_PATH}`);
+  console.log(
+    `Relay online: ${relayServer ? 'WebSocket em /ws/relay' : 'indisponível (fallback PeerJS)'}`
+  );
   console.log(
     `OAuth Google: ${providerAvailable('google') ? 'configurado' : 'desativado (falta GOOGLE_CLIENT_ID/SECRET válidos)'}`
   );

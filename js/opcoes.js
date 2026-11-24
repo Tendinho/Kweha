@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   backBtn.addEventListener('click', function () {
     if (manager) manager.play('button');
-    window.location.href = 'main-menu.html';
+    window.location.href = '/menu';
   });
 
   function setVolumeValue(value, notify) {

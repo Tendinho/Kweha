@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if ((localStorage.getItem('gameMode') || 'computer') !== 'online') return;
 
   const PEER_PREFIX = 'stopgame-';
-  const PEER_JS = '../assets/vendor/peerjs.min.js';
+  const PEER_JS = '/assets/vendor/peerjs.min.js';
   const PEER_JS_CDN = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
   const ROUND_TIME = 120;
   const ROUND_OPTIONS = [3, 5, 10, 15];
@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'color',
     'object',
     'city',
+    'food',
     'movie',
     'anime',
     'football',
@@ -36,6 +37,34 @@ document.addEventListener('DOMContentLoaded', function () {
   const myName = getMyName();
   const savedRoomCode = normalizeCode(localStorage.getItem('onlineRoomCode') || '');
   const words = window.STOP_WORDS || { categories: {}, names: [] };
+
+  const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ];
+
+  const MAX_GUEST_ATTEMPTS = 5;
+  const RELAY_PATH = '/ws/relay';
+  let peerOptions = { debug: 1, config: { iceServers: ICE_SERVERS } };
+  let peerFallbackTried = false;
+  let transportMode = 'peer';
 
   function tr(key, params) {
     return window.I18N ? window.I18N.t(key, params) : key;
@@ -107,7 +136,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   setupOverlay();
 
-  loadPeerJs()
+  resolveTransport()
+    .then(function () {
+      if (transportMode !== 'relay') return loadPeerJs();
+      return null;
+    })
     .then(function () {
       if (role === 'host') {
         createHostPeer();
@@ -269,6 +302,319 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function usePublicPeerServer() {
+    peerOptions = { debug: 1, config: { iceServers: ICE_SERVERS } };
+  }
+
+  // O servidor Kweha expõe um relay WebSocket. É a via principal porque
+  // funciona atrás de proxies e não depende de WebRTC/TURN. Se a página for
+  // aberta como ficheiro estático, cai para o PeerJS público.
+  function resolveTransport() {
+    if (window.location.protocol === 'file:') {
+      transportMode = 'peer';
+      usePublicPeerServer();
+      return Promise.resolve(transportMode);
+    }
+
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeout = controller
+      ? window.setTimeout(function () {
+          controller.abort();
+        }, 4000)
+      : null;
+
+    return fetch('/api/health', {
+      cache: 'no-store',
+      signal: controller ? controller.signal : undefined
+    })
+      .then(function (response) {
+        return response.ok ? response.json() : null;
+      })
+      .then(function (data) {
+        if (data && data.relay) {
+          transportMode = 'relay';
+          return transportMode;
+        }
+
+        transportMode = 'peer';
+        usePublicPeerServer();
+        return transportMode;
+      })
+      .catch(function () {
+        transportMode = 'peer';
+        usePublicPeerServer();
+        return transportMode;
+      })
+      .then(function (mode) {
+        if (timeout) window.clearTimeout(timeout);
+        return mode;
+      });
+  }
+
+  function createPeer(peerId) {
+    if (transportMode === 'relay') return new RelayPeer(peerId);
+    return new window.Peer(peerId, peerOptions);
+  }
+
+  function RelayConnection(relayPeer, id, hostSide) {
+    this.peer = id || '';
+    this.open = false;
+    this._relay = relayPeer;
+    this._hostSide = Boolean(hostSide);
+    this._handlers = {};
+    this._queue = [];
+    this._closed = false;
+  }
+
+  RelayConnection.prototype.on = function (event, handler) {
+    if (!this._handlers[event]) this._handlers[event] = [];
+    this._handlers[event].push(handler);
+    return this;
+  };
+
+  RelayConnection.prototype._emit = function (event, value) {
+    const handlers = this._handlers[event];
+    if (!handlers) return;
+    handlers.slice().forEach(function (handler) {
+      try {
+        handler(value);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  };
+
+  RelayConnection.prototype._setId = function (id) {
+    this.peer = id;
+  };
+
+  RelayConnection.prototype._markOpen = function () {
+    if (this.open || this._closed) return;
+    this.open = true;
+    this._emit('open');
+    const queue = this._queue;
+    this._queue = [];
+    queue.forEach((data) => this.send(data));
+  };
+
+  RelayConnection.prototype._markClosed = function () {
+    if (this._closed) return;
+    this._closed = true;
+    this.open = false;
+    this._emit('close');
+  };
+
+  RelayConnection.prototype.send = function (data) {
+    if (this._closed) return;
+    if (!this.open) {
+      this._queue.push(data);
+      return;
+    }
+    this._relay._send({
+      t: 'msg',
+      to: this._hostSide ? this.peer : undefined,
+      data: data
+    });
+  };
+
+  RelayConnection.prototype.close = function () {
+    if (this._closed) return;
+    if (!this._hostSide) this._relay._send({ t: 'leave' });
+    this._markClosed();
+  };
+
+  function RelayPeer(peerId) {
+    this.id = peerId || null;
+    this._handlers = {};
+    this._connections = new Map();
+    this._connection = null;
+    this._queue = [];
+    this._closed = false;
+    this._isHost = Boolean(
+      peerId && String(peerId).indexOf(PEER_PREFIX) === 0
+    );
+    this._room = this._isHost ? String(peerId).slice(PEER_PREFIX.length) : '';
+    this._socket = null;
+    this._openSocket();
+  }
+
+  RelayPeer.prototype._openSocket = function () {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const url = protocol + '//' + window.location.host + RELAY_PATH;
+    let socket;
+
+    try {
+      socket = new WebSocket(url);
+    } catch (error) {
+      this._emit('error', { type: 'network' });
+      return;
+    }
+
+    this._socket = socket;
+
+    socket.addEventListener('open', () => {
+      if (this._closed) return;
+
+      const queue = this._queue;
+      this._queue = [];
+
+      if (this._isHost) {
+        this._send({ t: 'host', room: this._room, name: myName });
+      }
+
+      queue.forEach((payload) => this._send(payload));
+
+      if (!this._isHost) this._emit('open');
+    });
+
+    socket.addEventListener('message', (event) => this._onMessage(event));
+
+    socket.addEventListener('error', () => {
+      if (!this._closed) this._emit('error', { type: 'network' });
+    });
+
+    socket.addEventListener('close', () => {
+      if (this._closed) return;
+      this._closed = true;
+
+      if (this._connection) this._connection._markClosed();
+      this._connections.forEach((connection) => connection._markClosed());
+      this._connections.clear();
+
+      this._emit('error', { type: 'network' });
+      this._emit('close');
+    });
+  };
+
+  RelayPeer.prototype._send = function (payload) {
+    if (this._closed) return;
+
+    if (this._socket && this._socket.readyState === 1) {
+      try {
+        this._socket.send(JSON.stringify(payload));
+      } catch (error) {
+        /* a ligação caiu entretanto */
+      }
+      return;
+    }
+
+    this._queue.push(payload);
+  };
+
+  RelayPeer.prototype._mapError = function (code) {
+    if (code === 'room-exists') return 'unavailable-id';
+    if (code === 'not-found') return 'peer-unavailable';
+    if (code === 'full') return 'full';
+    return 'network';
+  };
+
+  RelayPeer.prototype._onMessage = function (event) {
+    let message;
+
+    try {
+      message = JSON.parse(event.data);
+    } catch (error) {
+      return;
+    }
+
+    if (!message || typeof message.t !== 'string') return;
+
+    switch (message.t) {
+      case 'hosted':
+        this._emit('open');
+        break;
+
+      case 'joined':
+        if (!this._connection) {
+          this._connection = new RelayConnection(this, message.id, false);
+        }
+        this._connection._setId(message.id);
+        this._connection._markOpen();
+        break;
+
+      case 'peerJoin': {
+        const connection = new RelayConnection(this, message.id, true);
+        this._connections.set(message.id, connection);
+        this._emit('connection', connection);
+        connection._markOpen();
+        break;
+      }
+
+      case 'peerLeave': {
+        const connection = this._connections.get(message.id);
+        if (connection) {
+          this._connections.delete(message.id);
+          connection._markClosed();
+        }
+        break;
+      }
+
+      case 'hostLeft':
+        if (this._connection) this._connection._markClosed();
+        this._emit('close');
+        break;
+
+      case 'msg':
+        if (this._isHost) {
+          const connection = this._connections.get(message.from);
+          if (connection) connection._emit('data', message.data);
+        } else if (this._connection) {
+          this._connection._emit('data', message.data);
+        }
+        break;
+
+      case 'error':
+        this._emit('error', {
+          type: this._mapError(message.code),
+          code: message.code
+        });
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  RelayPeer.prototype.on = function (event, handler) {
+    if (!this._handlers[event]) this._handlers[event] = [];
+    this._handlers[event].push(handler);
+    return this;
+  };
+
+  RelayPeer.prototype._emit = function (event, value) {
+    const handlers = this._handlers[event];
+    if (!handlers) return;
+    handlers.slice().forEach(function (handler) {
+      try {
+        handler(value);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  };
+
+  RelayPeer.prototype.connect = function (peerId) {
+    if (this._isHost) return null;
+
+    this._room = String(peerId || '').replace(PEER_PREFIX, '').slice(0, 5);
+    if (!this._connection) {
+      this._connection = new RelayConnection(this, '', false);
+    }
+    this._send({ t: 'join', room: this._room, name: myName });
+    return this._connection;
+  };
+
+  RelayPeer.prototype.destroy = function () {
+    this._closed = true;
+    if (this._socket) {
+      try {
+        this._socket.close();
+      } catch (error) {
+        /* ignorar */
+      }
+    }
+  };
+
   function createHostPeer(attempt) {
     const tryNumber = attempt || 0;
 
@@ -277,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const code = roomCode;
-    const hostPeer = new Peer(PEER_PREFIX + code);
+    const hostPeer = createPeer(PEER_PREFIX + code);
     peer = hostPeer;
 
     hostPeer.on('open', function () {
@@ -298,6 +644,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     hostPeer.on('error', function (error) {
+      if (leaving || gameOver) return;
+
       if (error && error.type === 'unavailable-id' && tryNumber < 8) {
         try {
           hostPeer.destroy();
@@ -307,6 +655,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         roomCode = generateRoomCode();
         createHostPeer(tryNumber + 1);
+        return;
+      }
+
+      if (
+        error &&
+        (error.type === 'network' ||
+          error.type === 'server-error' ||
+          error.type === 'socket-error') &&
+        peerOptions.host &&
+        !peerFallbackTried
+      ) {
+        peerFallbackTried = true;
+        usePublicPeerServer();
+        try {
+          hostPeer.destroy();
+        } catch (destroyError) {
+          /* ignorar */
+        }
+        createHostPeer(tryNumber);
         return;
       }
 
@@ -328,9 +695,10 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    if (typeof window.Peer !== 'function') {
+    if (transportMode !== 'relay' && typeof window.Peer !== 'function') {
       statusEl.textContent = tr('online.loadingService');
       loadPeerJs()
+        .then(resolveTransport)
         .then(function () {
           connectToHost(code);
         })
@@ -346,28 +714,99 @@ document.addEventListener('DOMContentLoaded', function () {
     codeInput.value = code;
 
     closeConnection();
+    startGuestPeer(code, 0);
+  }
 
-    const guestPeer = new Peer();
+  function startGuestPeer(code, attempt) {
+    if (leaving || guestConnected) return;
+
+    const guestPeer = createPeer(null);
     peer = guestPeer;
+    let handled = false;
 
-    guestPeer.on('open', function () {
-      conn = guestPeer.connect(PEER_PREFIX + code, { reliable: true });
-      wireConnection(conn, false);
-    });
+    function destroyGuest() {
+      try {
+        guestPeer.destroy();
+      } catch (error) {
+        /* ignorar */
+      }
+    }
 
-    guestPeer.on('error', function (error) {
+    function handleFailure(error) {
+      if (handled || leaving || gameOver) return;
+      handled = true;
+      window.clearTimeout(connectTimeout);
+
       if (guestConnected) {
         showDisconnected();
         return;
       }
 
+      if (
+        error &&
+        (error.type === 'network' ||
+          error.type === 'server-error' ||
+          error.type === 'socket-error') &&
+        peerOptions.host &&
+        !peerFallbackTried
+      ) {
+        peerFallbackTried = true;
+        usePublicPeerServer();
+        destroyGuest();
+        retryGuest(code, attempt);
+        return;
+      }
+
+      if (error && error.type === 'full') {
+        destroyGuest();
+        showLobbyError(tr('online.roomFull'));
+        return;
+      }
+
       if (error && error.type === 'peer-unavailable') {
-        showLobbyError(tr('online.roomNotFound'));
+        destroyGuest();
+        retryGuest(code, attempt);
         return;
       }
 
       showLobbyError(tr('online.joinFailed'));
+    }
+
+    const connectTimeout = window.setTimeout(function () {
+      if (handled || guestConnected) return;
+      handled = true;
+      destroyGuest();
+      retryGuest(code, attempt);
+    }, 12000);
+
+    guestPeer.on('open', function () {
+      if (handled) return;
+      window.clearTimeout(connectTimeout);
+      conn = guestPeer.connect(PEER_PREFIX + code, { reliable: true });
+      wireConnection(conn, false);
     });
+
+    guestPeer.on('error', handleFailure);
+
+    statusEl.classList.remove('is-error');
+    statusEl.textContent = tr('online.connectingToRoom', { code: code });
+  }
+
+  function retryGuest(code, attempt) {
+    if (leaving || guestConnected) return;
+
+    const nextAttempt = attempt + 1;
+
+    if (nextAttempt >= MAX_GUEST_ATTEMPTS) {
+      showLobbyError(tr('online.roomNotFound'));
+      return;
+    }
+
+    statusEl.classList.remove('is-error');
+    statusEl.textContent = tr('online.connectingToRoom', { code: code });
+    window.setTimeout(function () {
+      startGuestPeer(code, nextAttempt);
+    }, 900 + attempt * 700);
   }
 
   function wireConnection(connection, hostSide) {
@@ -1396,9 +1835,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const dictionaries = getCategoryDictionaries(category);
     return dictionaries.some(function (dictionary) {
       return dictionary.some(function (word) {
-        return normalize(word) === normalize(answer);
+        return matchesAnswer(category, answer, word);
       });
     });
+  }
+
+  function matchesAnswer(category, answer, word) {
+    const helper = window.KwehaText;
+    if (helper && typeof helper.matchesEntry === 'function') {
+      return helper.matchesEntry(category, answer, word);
+    }
+
+    return normalize(answer) === normalize(word);
   }
 
   function getCategoryDictionaries(category) {
@@ -1651,7 +2099,7 @@ document.addEventListener('DOMContentLoaded', function () {
     hideOverlay();
     localStorage.setItem('gameResults', JSON.stringify(results));
     localStorage.setItem('gameMode', 'online');
-    window.location.href = 'winner-screen.html';
+    window.location.href = '/winner';
   }
 
   function askSurrender(messageKey) {
@@ -1728,7 +2176,7 @@ document.addEventListener('DOMContentLoaded', function () {
     leaving = true;
     window.setTimeout(function () {
       closeConnection();
-      window.location.href = 'main-menu.html';
+      window.location.href = '/menu';
     }, 150);
   }
 
@@ -1862,7 +2310,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     leaving = true;
     closeConnection();
-    window.location.href = 'main-menu.html';
+    window.location.href = '/menu';
   }
 
   function closeConnection() {

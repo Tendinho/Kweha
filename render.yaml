@@ -18,3 +18,17 @@ services:
         value: "1"
       - key: DB_PATH
         value: data/stop.db
+      # O plano free do Render tem disco temporário: contas e estatísticas
+      # desaparecem a cada deploy/reinício. Para dados permanentes usa um
+      # disco persistente (plano pago) ou uma VPS (ver DEPLOY.md).
+      - key: PUBLIC_URL
+        sync: false
+      # Login com Google (opcional). Preenche os valores no dashboard do
+      # Render; sem eles o botão do Google fica desativado e o login local
+      # continua a funcionar.
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false

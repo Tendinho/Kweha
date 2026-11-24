@@ -15,16 +15,16 @@
   };
 
   const SOURCES = {
-    button: '../assets/sounds/Select.mp3',
-    typing: '../assets/sounds/SFX - Lápis Escrevendo.mp3',
-    stop: '../assets/sounds/14- Sino Escola.mp3',
-    win: '../assets/sounds/Es Tu Mesmo.mp3',
-    lose: '../assets/sounds/Ta picar (eiii).mp3'
+    button: '/assets/sounds/Select.mp3',
+    typing: '/assets/sounds/SFX - Lápis Escrevendo.mp3',
+    stop: '/assets/sounds/14- Sino Escola.mp3',
+    win: '/assets/sounds/Es Tu Mesmo.mp3',
+    lose: '/assets/sounds/Ta picar (eiii).mp3'
   };
 
   const ICONS = {
-    on: '<svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-sound-on"></use></svg>',
-    off: '<svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-sound-off"></use></svg>'
+    on: '<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sound-on"></use></svg>',
+    off: '<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sound-off"></use></svg>'
   };
 
   function label(key, fallback) {

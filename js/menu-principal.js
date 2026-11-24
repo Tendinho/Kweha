@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
       avatar.classList.add('has-photo');
     } else {
       avatar.innerHTML =
-        '<svg class="icon" aria-hidden="true"><use href="../assets/icons/sprite.svg#i-user"></use></svg>';
+        '<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-user"></use></svg>';
     }
 
     const title = document.createElement('h2');
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     switchBtn.addEventListener('click', function () {
       playButtonSound();
-      window.location.href = 'login.html';
+      window.location.href = '/login';
     });
 
     logoutBtn.addEventListener('click', async function () {
@@ -330,25 +330,25 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    window.location.href = 'login.html';
+    window.location.href = '/login';
   });
 
   playVsComputerBtn.addEventListener('click', function () {
     playButtonSound();
     localStorage.setItem('gameMode', 'computer');
-    window.location.href = 'category-select.html';
+    window.location.href = '/categories';
   });
 
   playMultiplayerBtn.addEventListener('click', function () {
     playButtonSound();
     localStorage.setItem('gameMode', 'online');
     localStorage.setItem('onlineRole', 'host');
-    window.location.href = 'player-setup.html';
+    window.location.href = '/setup';
   });
 
   settingsBtn.addEventListener('click', function () {
     playButtonSound();
-    window.location.href = 'game-options.html';
+    window.location.href = '/options';
   });
 
   exitBtn.addEventListener('click', function () {
