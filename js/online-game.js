@@ -130,7 +130,6 @@ document.addEventListener('DOMContentLoaded', function () {
   let submitted = new Set();
   let progressByPlayer = {};
   let readyPlayers = new Set();
-  let finalReadyMode = false;
   let roundModal = null;
   let typingTimer = null;
 
@@ -876,6 +875,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (message.manual) {
           playSound('stop');
           sendAllExcept(connection.peer, { type: 'stopSound' });
+          finishRound();
+          break;
         }
         updateRoundHint();
         maybeFinishRound();
@@ -887,7 +888,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       case 'ready':
         readyPlayers.add(connection.peer);
-        maybeAdvanceRound();
         break;
 
       case 'progress':
@@ -1033,7 +1033,6 @@ document.addEventListener('DOMContentLoaded', function () {
     maxRounds = readMaxRounds();
     round = 0;
     usedLetters = [];
-    finalReadyMode = false;
     players.forEach(function (player) {
       player.score = 0;
     });
@@ -1062,7 +1061,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     round += 1;
     letter = pickLetter();
-    finalReadyMode = false;
     hideOverlay();
     prepareRound(round, letter);
     sendAll({
@@ -1077,6 +1075,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function beginRound(message) {
     if (gameOver) return;
 
+    closeRoundModal();
     lobbyStarted = true;
     const nextRound = Number(message.round);
     const nextLetter = String(message.letter || '').toUpperCase().slice(0, 1);
@@ -1215,6 +1214,8 @@ document.addEventListener('DOMContentLoaded', function () {
       input.setAttribute('data-lpignore', 'true');
       input.setAttribute('data-1p-ignore', 'true');
       input.setAttribute('aria-label', getCategoryName(category));
+      input.setAttribute('inputmode', 'text');
+      input.setAttribute('enterkeyhint', 'done');
       input.disabled = true;
 
       input.addEventListener('keydown', function (event) {
@@ -1453,7 +1454,12 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    maybeFinishRound();
+    if (autoSubmit) {
+      maybeFinishRound();
+      return;
+    }
+
+    finishRound();
   }
 
   function maybeFinishRound() {
@@ -1654,6 +1660,76 @@ document.addEventListener('DOMContentLoaded', function () {
       body.appendChild(row);
     });
 
+    const detailsBody = document.createElement('div');
+    detailsBody.className = 'game-details hidden';
+
+    const detailsTitle = document.createElement('p');
+    detailsTitle.className = 'game-details-title';
+    detailsTitle.textContent = tr('game.detailsTitle');
+    detailsBody.appendChild(detailsTitle);
+
+    categories.forEach(function (category) {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'game-detail-row';
+
+      const top = document.createElement('div');
+      top.className = 'game-detail-top';
+
+      const categoryLabel = document.createElement('span');
+      categoryLabel.className = 'game-detail-cat';
+      categoryLabel.textContent = getCategoryName(category);
+
+      top.appendChild(categoryLabel);
+      rowEl.appendChild(top);
+
+      payload.players.forEach(function (player) {
+        const answer = player.answers && player.answers[category] ? player.answers[category] : '';
+        const valid = Boolean(player.valid && player.valid[category]);
+        const line = document.createElement('div');
+        line.className = 'game-detail-line game-detail-player';
+
+        if (valid) {
+          line.classList.add('is-correct');
+        } else if (answer) {
+          line.classList.add('is-wrong');
+        } else {
+          line.classList.add('is-empty');
+        }
+
+        const name = document.createElement('span');
+        name.textContent = player.name + (player.id === myId ? tr('common.youSuffix') : '');
+
+        const value = document.createElement('strong');
+        value.textContent = (answer || '—') + (valid ? ' ✓' : answer ? ' ✗' : '');
+
+        line.appendChild(name);
+        line.appendChild(value);
+        rowEl.appendChild(line);
+      });
+
+      const suggestion = pickSuggestion(category);
+
+      if (suggestion) {
+        const line = document.createElement('div');
+        line.className = 'game-detail-line';
+
+        const label = document.createElement('span');
+        label.textContent = tr('game.correctAnswer');
+
+        const value = document.createElement('strong');
+        value.textContent = suggestion;
+
+        line.appendChild(label);
+        line.appendChild(value);
+        rowEl.appendChild(line);
+      }
+
+      detailsBody.appendChild(rowEl);
+    });
+
+    const scoresBody = document.createElement('div');
+    scoresBody.className = 'game-modal-body';
+
     payload.players.forEach(function (player) {
       const row = document.createElement('div');
       row.className = 'game-modal-row';
@@ -1669,7 +1745,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       row.appendChild(label);
       row.appendChild(value);
-      body.appendChild(row);
+      scoresBody.appendChild(row);
     });
 
     const button = document.createElement('button');
@@ -1685,10 +1761,30 @@ document.addEventListener('DOMContentLoaded', function () {
       handleNextRound();
     });
 
+    const revealButton = document.createElement('button');
+    revealButton.type = 'button';
+    revealButton.className = 'btn btn-ghost';
+    revealButton.textContent = tr('game.revealAnswers');
+    revealButton.setAttribute('aria-expanded', 'false');
+    revealButton.addEventListener('click', function () {
+      const showing = detailsBody.classList.contains('hidden');
+      detailsBody.classList.toggle('hidden', !showing);
+      body.classList.toggle('hidden', showing);
+      revealButton.textContent = showing ? tr('game.hideAnswers') : tr('game.revealAnswers');
+      revealButton.setAttribute('aria-expanded', String(showing));
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'game-modal-actions';
+    actions.appendChild(revealButton);
+    actions.appendChild(button);
+
     card.appendChild(title);
     card.appendChild(subtitle);
     card.appendChild(body);
-    card.appendChild(button);
+    card.appendChild(detailsBody);
+    card.appendChild(scoresBody);
+    card.appendChild(actions);
     modal.appendChild(card);
     document.body.appendChild(modal);
     roundModal = modal;
@@ -1709,7 +1805,7 @@ document.addEventListener('DOMContentLoaded', function () {
     readyPlayers.add(myId);
 
     if (role === 'host') {
-      maybeAdvanceRound();
+      startNextRound();
       return;
     }
 
@@ -1717,55 +1813,17 @@ document.addEventListener('DOMContentLoaded', function () {
     showWaitingOverlay(tr('online.waitingNextRound'));
   }
 
-  function maybeAdvanceRound() {
-    if (role !== 'host') return;
-
-    if (finalReadyMode) {
-      if (allActiveReady()) {
-        broadcastGameOver(buildResults());
-        return;
-      }
-
-      showWaitingOverlay(tr('online.waitingAllReady'));
-      return;
-    }
-
-    if (!allActiveReady()) {
-      showWaitingOverlay(tr('online.waitingAllReady'));
-      return;
-    }
-
-    if (round >= maxRounds) {
-      broadcastGameOver(buildResults());
-      return;
-    }
-
-    hideOverlay();
-    startNextRound();
-  }
-
   function handleFinalContinue() {
     closeRoundModal();
     readyPlayers.add(myId);
 
     if (role === 'host') {
-      finalReadyMode = true;
-      maybeAdvanceRound();
+      broadcastGameOver(buildResults());
       return;
     }
 
     send({ type: 'ready' });
     showWaitingOverlay(tr('online.waitingHostResult'));
-  }
-
-  function allActiveReady() {
-    const activePlayers = players.filter(function (player) {
-      return player.connected;
-    });
-
-    return activePlayers.length > 0 && activePlayers.every(function (player) {
-      return readyPlayers.has(player.id);
-    });
   }
 
   function removePlayer(id, notify) {
@@ -1869,6 +1927,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     return list;
+  }
+
+  function pickSuggestion(category) {
+    const list = category === 'name'
+      ? words.names || []
+      : getCategoryDictionaries(category).reduce(function (all, dictionary) {
+          return all.concat(dictionary);
+        }, []);
+
+    for (let i = 0; i < list.length; i += 1) {
+      if (startsWithLetter(list[i])) return list[i];
+    }
+
+    return '';
   }
 
   function startsWithLetter(text) {

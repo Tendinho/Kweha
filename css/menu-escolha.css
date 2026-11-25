@@ -358,18 +358,39 @@
 
 @media (max-width: 560px) {
   .difficulty-options {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .rounds-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .difficulty-btn {
+    align-items: center;
+    padding: 10px 6px;
+    text-align: center;
+  }
+
+  .difficulty-btn strong {
+    font-size: 0.78rem;
+  }
+
+  .difficulty-btn span {
+    display: none;
   }
 
   .categories {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .category-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    padding: 14px;
+    gap: 8px;
+    padding: 12px;
+    border-width: 2px;
   }
 
   .category-icon {
@@ -383,11 +404,29 @@
     height: 24px;
   }
 
+  .category-name {
+    font-size: 0.92rem;
+  }
+
+  .category-foot {
+    font-size: 0.66rem;
+  }
+
   .category-footer {
-    flex-direction: column;
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+    background: var(--paper);
+    border-top: 2px solid rgba(16, 42, 67, 0.08);
+    box-shadow: 0 -10px 22px rgba(16, 42, 67, 0.1);
   }
 
   .category-footer .btn {
-    width: 100%;
+    flex: 1 1 auto;
+    width: auto;
   }
 }

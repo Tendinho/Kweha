@@ -224,6 +224,8 @@ document.addEventListener('DOMContentLoaded', function () {
       input.setAttribute('data-lpignore', 'true');
       input.setAttribute('data-1p-ignore', 'true');
       input.setAttribute('aria-label', getCategoryName(category));
+      input.setAttribute('inputmode', 'text');
+      input.setAttribute('enterkeyhint', 'done');
 
       input.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
@@ -503,6 +505,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  function pickSuggestion(category) {
+    const list = category === 'name' ? nameDictionary : dictionaries[category] || [];
+
+    for (let i = 0; i < list.length; i += 1) {
+      if (startsWithLetter(list[i])) return list[i];
+    }
+
+    return '';
+  }
+
   function timeUp() {
     if (!gameActive) return;
     submitAnswers(true);
@@ -619,6 +631,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const totalComputer = players[1].score;
     const finalRound = currentRound >= MAX_ROUNDS;
 
+    const details = selectedCategories.map((category) => {
+      const playerAnswer = (playerAnswers[category] || '').trim();
+
+      return {
+        label: getCategoryName(category),
+        playerAnswer: playerAnswer,
+        suggestion: pickSuggestion(category),
+        valid: Boolean(validAnswers[category]),
+        hasAnswer: playerAnswer.length > 0
+      };
+    });
+
     showModal({
       title: tr('game.roundEndTitle', { round: currentRound }),
       subtitle: tr('game.roundEndSubtitle', {
@@ -627,6 +651,7 @@ document.addEventListener('DOMContentLoaded', function () {
         computer: totalComputer
       }),
       rows: rows,
+      details: details,
       buttonText: tr(finalRound ? 'game.seeResult' : 'game.nextRound'),
       onClose: finalRound ? endGame : startRound
     });
@@ -690,6 +715,79 @@ document.addEventListener('DOMContentLoaded', function () {
       body.appendChild(rowEl);
     });
 
+    const detailList = Array.isArray(options.details) ? options.details : [];
+    let detailsBody = null;
+
+    if (detailList.length > 0) {
+      detailsBody = document.createElement('div');
+      detailsBody.className = 'game-details hidden';
+
+      const detailsTitle = document.createElement('p');
+      detailsTitle.className = 'game-details-title';
+      detailsTitle.textContent = tr('game.detailsTitle');
+      detailsBody.appendChild(detailsTitle);
+
+      detailList.forEach((detail) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'game-detail-row';
+
+        if (detail.valid) {
+          rowEl.classList.add('is-correct');
+        } else if (detail.hasAnswer) {
+          rowEl.classList.add('is-wrong');
+        } else {
+          rowEl.classList.add('is-empty');
+        }
+
+        const top = document.createElement('div');
+        top.className = 'game-detail-top';
+
+        const categoryLabel = document.createElement('span');
+        categoryLabel.className = 'game-detail-cat';
+        categoryLabel.textContent = detail.label;
+
+        const badge = document.createElement('span');
+        badge.className = 'game-detail-badge';
+        badge.textContent = detail.valid
+          ? tr('game.correct')
+          : detail.hasAnswer
+            ? tr('game.wrong')
+            : tr('game.noAnswer');
+
+        top.appendChild(categoryLabel);
+        top.appendChild(badge);
+        rowEl.appendChild(top);
+
+        const mineLine = document.createElement('div');
+        mineLine.className = 'game-detail-line';
+
+        const mineLabel = document.createElement('span');
+        mineLabel.textContent = tr('game.yourAnswer');
+
+        const mineValue = document.createElement('strong');
+        mineValue.textContent = detail.hasAnswer ? detail.playerAnswer : '—';
+
+        mineLine.appendChild(mineLabel);
+        mineLine.appendChild(mineValue);
+        rowEl.appendChild(mineLine);
+
+        const correctLine = document.createElement('div');
+        correctLine.className = 'game-detail-line';
+
+        const correctLabel = document.createElement('span');
+        correctLabel.textContent = tr('game.correctAnswer');
+
+        const correctValue = document.createElement('strong');
+        correctValue.textContent = detail.suggestion || '—';
+
+        correctLine.appendChild(correctLabel);
+        correctLine.appendChild(correctValue);
+        rowEl.appendChild(correctLine);
+
+        detailsBody.appendChild(rowEl);
+      });
+    }
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'btn btn-primary';
@@ -702,7 +800,42 @@ document.addEventListener('DOMContentLoaded', function () {
       card.appendChild(body);
     }
 
-    card.appendChild(button);
+    if (detailsBody) {
+      card.appendChild(detailsBody);
+    }
+
+    const revealButton = detailsBody
+      ? document.createElement('button')
+      : null;
+
+    if (revealButton) {
+      revealButton.type = 'button';
+      revealButton.className = 'btn btn-ghost';
+      revealButton.textContent = tr('game.revealAnswers');
+      revealButton.setAttribute('aria-expanded', 'false');
+      revealButton.addEventListener('click', function () {
+        const showing = detailsBody.classList.contains('hidden');
+        detailsBody.classList.toggle('hidden', !showing);
+
+        if ((options.rows || []).length > 0) {
+          body.classList.toggle('hidden', showing);
+        }
+
+        revealButton.textContent = showing
+          ? tr('game.hideAnswers')
+          : tr('game.revealAnswers');
+        revealButton.setAttribute('aria-expanded', String(showing));
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'game-modal-actions';
+      actions.appendChild(revealButton);
+      actions.appendChild(button);
+      card.appendChild(actions);
+    } else {
+      card.appendChild(button);
+    }
+
     overlay.appendChild(card);
     document.body.appendChild(overlay);
 

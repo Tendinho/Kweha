@@ -11,6 +11,7 @@
   justify-content: center;
   justify-content: safe center;
   min-height: 100vh;
+  min-height: 100dvh;
   padding-block: clamp(20px, 4vh, 40px);
   gap: clamp(20px, 4vw, 34px);
 }
@@ -295,6 +296,10 @@
 }
 
 @media (max-width: 480px) {
+  .login-page {
+    padding-bottom: calc(clamp(20px, 4vh, 40px) + env(safe-area-inset-bottom));
+  }
+
   .login-card {
     padding: 20px 16px;
   }
