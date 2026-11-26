@@ -874,6 +874,371 @@
     }
   };
 
+  // Conteúdo de 2026-2027 para todas as categorias. As palavras partilhadas
+  // incluem variantes em pt/en/es/fr para que qualquer idioma aceite a resposta.
+  const CONTENT_2026_2027_NAMES = [
+    "Lamine", "Aitana", "Endrick", "Estêvão", "Jude", "Kylian", "Erling", "Bukayo",
+    "Cole", "Pedri", "Gavi", "Pau", "Nico", "Khvicha", "Jamal", "Florian",
+    "Michael", "Viktor", "Alexander", "Mohamed", "Sadio", "Victor", "Ademola",
+    "Achraf", "Brahim", "Yassine", "Hakim", "Bryan", "Samuel", "Sabrina",
+    "Chappell", "Doechii", "Gracie", "Olivia", "Billie", "Charli", "Rosalía",
+    "Karol", "Anitta", "Ludmilla", "Jão", "Pabllo", "Lola", "Quevedo",
+    "Shakira", "Taylor", "Rihanna", "Zendaya", "Timothée", "Dua"
+  ];
+
+  const CONTENT_2026_2027_WORDS = {
+    country: [
+      "Curaçao", "Curazao", "Jordânia", "Jordan", "Jordanie",
+      "Uzbequistão", "Uzbekistan", "Ouzbékistan", "Kosovo",
+      "Sudão do Sul", "South Sudan", "Soudan du Sud",
+      "Timor-Leste", "East Timor", "Timor oriental",
+      "São Tomé e Príncipe", "Sao Tome and Principe", "Sao Tomé-et-Principe",
+      "Seicheles", "Seychelles", "Comores", "Comoros",
+      "Cabo Verde", "Cape Verde", "Jamaica", "Panamá", "Panama"
+    ],
+    animal: [
+      "Axolote", "Axolotl", "Ajolote", "Capivara", "Capybara", "Capibara",
+      "Lobo-guará", "Maned wolf", "Lobo de crin", "Loup à crinière",
+      "Onça-pintada", "Jaguar", "Baleia-jubarte", "Humpback whale",
+      "Ballena jorobada", "Baleine à bosse", "Tubarão-baleia", "Whale shark",
+      "Tiburón ballena", "Requin-baleine", "Leopardo-das-neves", "Snow leopard",
+      "Leopardo de las nieves", "Léopard des neiges", "Pinguim-imperador",
+      "Emperor penguin", "Pingüino emperador", "Pingouin empereur",
+      "Ornitorrinco", "Platypus", "Ornithorynque", "Diabo-da-tasmânia",
+      "Tasmanian devil", "Demonio de Tasmania", "Diable de Tasmanie",
+      "Tucano", "Toucan", "Tucán", "Beija-flor", "Hummingbird", "Colibrí",
+      "Colibri", "Coruja-das-neves", "Snowy owl", "Búho nival",
+      "Harfang des neiges", "Sucuri", "Anaconda", "Orca", "Orque",
+      "Morsa", "Walrus", "Morse"
+    ],
+    fruit: [
+      "Yuzu", "Kiwano", "Finger lime", "Limão-caviar", "Lima caviar",
+      "Citron caviar", "Pitaya", "Pitaia", "Açaí", "Acai", "Mangostão",
+      "Mangosteen", "Mangostán", "Mangoustan", "Rambutã", "Rambutan",
+      "Rambután", "Lichia", "Lychee", "Litchi", "Physalis", "Fisális",
+      "Durião", "Durian", "Durián", "Cupuaçu", "Cupuacu", "Camu-camu",
+      "Camu camu", "Tamarindo", "Tamarind", "Tamarin", "Jaca", "Jackfruit",
+      "Jacquier", "Goiaba", "Guava", "Guayaba", "Goyave", "Maracujá",
+      "Passion fruit", "Maracuyá", "Fruit de la passion", "Graviola",
+      "Soursop", "Guanábana", "Corossol", "Manga", "Mango", "Mangue",
+      "Abacate", "Avocado", "Aguacate", "Avocat", "Coco", "Coconut",
+      "Noix de coco"
+    ],
+    color: [
+      "Cloud Dancer", "Mocha Mousse", "Peach Fuzz", "Viva Magenta", "Very Peri",
+      "Lavanda", "Lavender", "Terracota", "Terracotta", "Turquesa", "Turquoise",
+      "Mostarda", "Mustard", "Bordô", "Burgundy", "Grafite", "Graphite",
+      "Champanhe", "Champagne", "Coral", "Cobre", "Copper", "Dourado", "Gold",
+      "Prata", "Silver", "Verde-oliva", "Olive green", "Azul-celeste",
+      "Sky blue", "Areia", "Sand", "Nude"
+    ],
+    object: [
+      "Óculos inteligentes", "Smart glasses", "Gafas inteligentes",
+      "Lunettes intelligentes", "Anel inteligente", "Smart ring",
+      "Anillo inteligente", "Bague connectée", "Robotaxi",
+      "Drone de entrega", "Delivery drone", "Dron de reparto",
+      "Drone de livraison", "Painel solar", "Solar panel", "Panel solar",
+      "Panneau solaire", "Bateria de estado sólido", "Solid-state battery",
+      "Batería de estado sólido", "Batterie solide", "Telemóvel dobrável",
+      "Foldable phone", "Teléfono plegable", "Téléphone pliable",
+      "Consola portátil", "Handheld console", "Console portable",
+      "Impressora 3D", "3D printer", "Impresora 3D", "Imprimante 3D",
+      "Robot aspirador", "Robot vacuum", "Robot aspirateur",
+      "Trotinete elétrica", "Electric scooter", "Patinete eléctrico",
+      "Trottinette électrique", "Bicicleta elétrica", "E-bike",
+      "Bicicleta eléctrica", "Vélo électrique", "Carregador rápido",
+      "Fast charger", "Cargador rápido", "Chargeur rapide", "Power bank",
+      "Batería externa", "Batterie externe", "Auscultadores VR", "VR headset",
+      "Auriculares VR", "Casque VR", "Smartwatch", "Reloj inteligente",
+      "Montre connectée", "Câmara de ação", "Action camera", "Cámara de acción",
+      "Caméra d'action", "Gimbal", "Ring light", "Aro de luz", "Microfone",
+      "Microphone", "Micrófono", "Portátil gaming", "Gaming laptop",
+      "PC portable gaming", "Air fryer", "Freidora de aire", "Máquina de café",
+      "Coffee machine", "Cafetera", "Machine à café"
+    ],
+    city: [
+      "Cidade do México", "Mexico City", "Ciudad de México", "Monterrey",
+      "Guadalajara", "Nova Iorque", "New York", "Nueva York", "Los Angeles",
+      "Los Ángeles", "Miami", "Dallas", "Atlanta", "Seattle", "São Francisco",
+      "San Francisco", "Boston", "Filadélfia", "Philadelphia", "Filadelfia",
+      "Philadelphie", "Houston", "Kansas City", "East Rutherford", "Inglewood",
+      "Arlington", "Santa Clara", "Foxborough", "Rio de Janeiro", "São Paulo",
+      "Brasília", "Brasilia", "Salvador", "Fortaleza", "Recife", "Porto Alegre",
+      "Belo Horizonte", "Manaus", "Cuiabá", "Cuiaba"
+    ],
+    food: [
+      "Chocolate de Dubai", "Dubai chocolate", "Chocolate de Dubái",
+      "Chocolat de Dubaï", "Matcha", "Bubble tea", "Té de burbujas",
+      "Thé aux perles", "Poke bowl", "Poke", "Kimbap", "Birria",
+      "Smash burger", "Churros", "Ramen", "Sushi", "Tacos", "Burrito",
+      "Shawarma", "Kebab", "Falafel", "Hummus", "Houmous", "Pad thai",
+      "Pad thaï", "Pho", "Dim sum", "Croissant", "Pastel de nata",
+      "Tiramisu", "Tiramisú", "Cheesecake", "Tarta de queso", "Açaí bowl",
+      "Acai bowl", "Bol de açaí", "Bol d'açaí"
+    ],
+    football: [
+      "Wrexham", "Paris FC", "Como", "Sunderland", "Hamburgo",
+      "Hamburger SV", "Schalke 04", "Hertha Berlin", "Real Zaragoza",
+      "Sporting Gijón", "Racing Santander", "Cremonese", "Pisa", "Elche",
+      "Levante", "Real Oviedo", "Inter Miami", "Al Nassr", "Al Hilal",
+      "Al Ittihad", "Al Ahly", "Zamalek", "Raja Casablanca", "Wydad",
+      "TP Mazembe", "Espérance", "Étoile du Sahel", "Mamelodi Sundowns",
+      "Orlando Pirates", "Kaizer Chiefs", "Simba SC", "Young Africans",
+      "Petro de Luanda", "1º de Agosto", "Sagrada Esperança", "Interclube",
+      "Recreativo do Libolo", "Kabuscorp", "Bravos do Maquis",
+      "Desportivo da Huíla", "Wiliete"
+    ],
+    anime: [
+      "Dandadan Season 2", "Dandadan Season 3", "Delicious in Dungeon Season 2",
+      "Chainsaw Man Season 2", "Jujutsu Kaisen Season 4", "Solo Leveling Season 3",
+      "Spy x Family Season 4", "Blue Lock Season 3", "Sakamoto Days Season 2",
+      "Gachiakuta Season 2", "The Apothecary Diaries Season 3",
+      "One Piece: Elbaf Arc", "Frieren Season 2", "Cyberpunk: Edgerunners 2",
+      "Kaiju No. 8 Season 2", "Wind Breaker Season 2", "Blue Box Season 2",
+      "The Summer Hikaru Died Season 2", "My Hero Academia: Final Season",
+      "Demon Slayer: Infinity Castle", "Chainsaw Man: Reze Arc"
+    ],
+    series: [
+      "Percy Jackson and the Olympians Season 3", "The Pitt Season 2",
+      "Your Friendly Neighborhood Spider-Man Season 2", "House of the Dragon Season 3",
+      "The Boys Season 5", "Euphoria Season 3", "Stranger Things Season 5",
+      "Wednesday Season 3", "The Bear Season 5", "Fallout Season 3",
+      "One Piece Season 3", "Bridgerton Season 5", "Dune: Prophecy Season 2",
+      "Severance Season 3", "The Last of Us Season 3", "The White Lotus Season 4",
+      "A Knight of the Seven Kingdoms", "The Witcher Season 4",
+      "It: Welcome to Derry Season 2", "Alien: Earth Season 2",
+      "Peacemaker Season 3", "Daredevil: Born Again Season 2",
+      "The Night Agent Season 3", "The Diplomat Season 3",
+      "The Gilded Age Season 4", "Squid Game Season 3",
+      "Alice in Borderland Season 3"
+    ],
+    sport: [
+      "Flag football", "Futebol de bandeira", "Fútbol bandera", "Squash",
+      "Lacrosse", "Basebol", "Baseball", "Béisbol", "Softbol", "Softball",
+      "Sóftbol", "Críquete", "Cricket", "Críquet", "Futebol de praia",
+      "Beach soccer", "Fútbol playa", "Basquete 3x3", "3x3 basketball",
+      "Baloncesto 3x3", "Basket 3x3", "Hóquei em patins", "Roller hockey",
+      "Hockey sobre patines", "Rink hockey", "Padel", "Pádel", "Pickleball",
+      "eSports", "Esports", "eSport", "Breaking", "Escalada",
+      "Sport climbing", "Escalade", "Parkour", "Crossfit", "CrossFit",
+      "Trail running", "Stand-up paddle", "Stand-up paddleboarding",
+      "Kitesurf", "Kitesurfing", "Windsurf", "Windsurfing", "BMX racing"
+    ],
+    brand: [
+      "OpenAI", "ChatGPT", "Claude", "Gemini", "Grok", "DeepSeek", "Perplexity",
+      "Mistral", "Midjourney", "Sora", "Cursor", "Lovable", "Replit", "Canva",
+      "Figma", "Notion", "Discord", "Twitch", "TikTok", "Threads", "Bluesky",
+      "Shein", "Temu", "BYD", "Xiaomi", "Huawei", "Honor", "Oppo", "Vivo",
+      "Realme", "Tecno", "Infinix", "Transsion", "Waymo", "Tesla", "Rivian",
+      "Lucid", "Nothing", "Gymshark", "Skims", "Glovo", "Bolt", "Uber Eats",
+      "DoorDash", "Revolut", "Nubank", "Wise", "Klarna", "Duolingo",
+      "Epic Games", "Unitel", "MTN", "Airtel", "Bai", "Multicaixa", "Express",
+      "Zap", "Candando", "Kero", "Nosso Super", "Shoprite", "Pep",
+      "Mr Price", "Jumia", "Kilimall"
+    ],
+    profession: [
+      "Especialista em IA", "AI specialist", "Especialista en IA",
+      "Spécialiste en IA", "Engenheiro de prompts", "Prompt engineer",
+      "Ingeniero de prompts", "Ingénieur de prompts", "Criador de conteúdo",
+      "Content creator", "Creador de contenido", "Créateur de contenu",
+      "Gestor de redes sociais", "Social media manager",
+      "Gestor de redes sociales", "Community manager", "Streamer",
+      "Youtuber", "YouTuber", "Youtubeur", "Podcaster", "Podcasteur",
+      "Influencer", "Influenceur", "Analista de dados", "Data analyst",
+      "Analista de datos", "Analyste de données", "Cientista de dados",
+      "Data scientist", "Científico de datos", "Engenheiro de cibersegurança",
+      "Cybersecurity engineer", "Ingeniero de ciberseguridad",
+      "Ingénieur en cybersécurité", "Desenvolvedor de jogos", "Game developer",
+      "Desarrollador de videojuegos", "Développeur de jeux vidéo",
+      "Designer UX", "UX designer", "Diseñador UX", "Gestor de produto",
+      "Product manager", "Gestor de producto", "Chef de produit",
+      "Especialista em e-commerce", "E-commerce specialist",
+      "Especialista en comercio electrónico", "Spécialiste e-commerce",
+      "Motorista de aplicativo", "Rideshare driver", "Conductor de apps",
+      "Chauffeur VTC", "Técnico de energia solar", "Solar energy technician",
+      "Técnico de energía solar", "Technicien en énergie solaire",
+      "Especialista em robótica", "Robotics engineer",
+      "Especialista en robótica", "Ingénieur en robotique",
+      "Gestor de sustentabilidade", "Sustainability manager",
+      "Gestor de sostenibilidad", "Responsable durabilité", "Enfermeiro",
+      "Nurse", "Enfermero", "Infirmier", "Professor", "Teacher", "Profesor",
+      "Professeur", "Médico", "Doctor", "Médecin", "Motorista", "Driver",
+      "Conductor", "Chauffeur", "Cozinheiro", "Cook", "Cocinero", "Cuisinier",
+      "Programador", "Programmer", "Programmeur", "Designer", "Diseñador"
+    ],
+    videogame: [
+      "Grand Theft Auto VI", "GTA VI", "GTA 6", "Resident Evil Requiem",
+      "007 First Light", "Crimson Desert", "Marvel's Wolverine", "Nioh 3",
+      "The Witcher 4", "Intergalactic: The Heretic Prophet", "Forza Horizon 6",
+      "Fable", "Until Dawn 2", "Metro 2039", "Persona 4 Revival",
+      "Tomb Raider: Legacy of Atlantis", "Pragmata", "Saros",
+      "Onimusha: Way of the Sword", "Phantom Blade Zero", "Ghost of Yotei",
+      "Death Stranding 2", "Monster Hunter Wilds", "Assassin's Creed Shadows",
+      "Clair Obscur: Expedition 33", "Kingdom Come: Deliverance II",
+      "Split Fiction", "Hollow Knight: Silksong", "Elden Ring Nightreign",
+      "Mario Kart World", "Donkey Kong Bananza", "Metroid Prime 4: Beyond",
+      "Pokémon Legends: Z-A", "Silent Hill f", "Mafia: The Old Country",
+      "Borderlands 4", "Battlefield 6", "Call of Duty: Black Ops 7",
+      "Anno 117: Pax Romana", "The Outer Worlds 2", "Avowed",
+      "Sniper Elite: Resistance", "Like a Dragon: Pirate Yakuza in Hawaii",
+      "Dynasty Warriors: Origins", "Indiana Jones and the Great Circle",
+      "S.T.A.L.K.E.R. 2", "Metaphor: ReFantazio", "Astro Bot",
+      "Black Myth: Wukong", "Balatro", "Animal Well", "Helldivers 2",
+      "Palworld", "Marvel Rivals", "Infinity Nikki", "Wuthering Waves",
+      "Zenless Zone Zero"
+    ],
+    singer: [
+      "Sabrina Carpenter", "Billie Eilish", "Taylor Swift", "Bad Bunny",
+      "Kendrick Lamar", "Doechii", "Gracie Abrams", "Olivia Rodrigo",
+      "Chappell Roan", "Charli XCX", "Rosalía", "Karol G", "Shakira",
+      "Peso Pluma", "Feid", "Rauw Alejandro", "Bad Gyal", "Aitana",
+      "Lola Indigo", "Quevedo", "Myke Towers", "Anitta", "Ludmilla",
+      "Luísa Sonza", "Pabllo Vittar", "Jão", "SZA", "Frank Ocean", "Tyla",
+      "Rema", "Asake", "Ayra Starr", "Burna Boy", "Wizkid", "Davido",
+      "Tems", "Amaarae", "Black Sherif", "Omah Lay", "Ruger", "BNXN",
+      "Seyi Vibez", "Shallipopi", "Fireboy DML", "Joeboy", "Kizz Daniel",
+      "Zlatan", "Portable", "Spyro", "Soraia Ramos", "Dino d'Santiago",
+      "Lisandro Cuxi", "Badoxa", "Virgul", "Loony Johnson", "Ivan Alekxei",
+      "Pablo Nunes", "Nelson Freitas", "C4 Pedro", "Djodje", "Landrick",
+      "Anselmo Ralph", "Bonga", "Paulo Flores", "Yola Semedo", "Preto Show",
+      "Cef Tanzy", "Mylson", "Kataleya", "Gerilson Insrael",
+      "Matias Damásio", "Caló Pascoal", "Yuri da Cunha", "Heavy C",
+      "Big Nelo", "SSP", "Rei Helder", "Anna Joyce", "Célia Melo",
+      "Filho do Zua", "Cage One", "Tchobolito", "Hanay", "Nacob", "NGA",
+      "B4", "Jay Rox", "Macky 2", "Chef 187", "Yo Maps",
+      "Roberto Chimbala", "El Alfa", "Natti Natasha", "Becky G", "Ozuna",
+      "Daddy Yankee", "J Balvin", "Maluma"
+    ],
+    musicstyle: [
+      "Afrobeats", "Afrobeat", "Afrohouse", "Amapiano", "Highlife",
+      "Makossa", "Soukous", "Ndombolo", "Mbalax", "Raï", "Gnawa", "Fuji",
+      "Juju", "Kwaito", "Maskandi", "Mbube", "Isicathamiya", "Bongo Flava",
+      "Taarab", "Gqom", "Shangaan Electro", "Coupé-Décalé", "Zouglou",
+      "Mapouka", "Mahraganat", "Chaabi", "Maloya", "Séga", "Morna",
+      "Coladeira", "Funaná", "Batuque", "Salsa", "Merengue", "Bachata",
+      "Cumbia", "Samba", "Lambada", "Forró", "Axé", "MPB", "Fado",
+      "Flamenco", "Tango", "Reggae", "Dancehall", "Gospel", "Hip Hop",
+      "Rap", "R&B", "Trap", "Drill", "Funk", "Soul", "Pop", "Rock", "Jazz",
+      "Blues", "Country", "Metal", "Punk", "Classical", "Disco", "K-pop",
+      "J-pop", "Bossa Nova", "Bolero", "Calypso", "Soca", "Kompa", "EDM",
+      "House", "Techno", "Trance", "Dubstep", "Drum and Bass",
+      "Rock and Roll", "Swing", "Reggaeton", "Hyperpop", "Phonk",
+      "Jersey club", "UK garage", "Baile funk", "Dembow", "Trap latino",
+      "Corrido tumbado", "City pop", "Lo-fi", "Bedroom pop", "Shoegaze",
+      "Dance-pop", "Afro-fusion", "Alté", "R&B alternativo", "Latin drill",
+      "Neoperreo", "Corridos tumbados", "Música urbana", "Singeli",
+      "Gengetone", "Afro-drill", "3-Step", "Bouyon", "Kuduro", "Kizomba",
+      "Semba", "Zouk", "Kabetula", "Kazukuta", "Rebita", "Kilapanga",
+      "Pausada"
+    ],
+    national: [
+      "Kota", "Brada", "Mano", "Kamba", "Mboa", "Cota", "Pitéu",
+      "Zungueira", "Candongueiro", "Kupapata", "Kubika", "Kutanda",
+      "Kuzola", "Kusala", "Kufa", "Kuxica", "Kubanza", "Kuxinga", "Maka",
+      "Bazar", "Ndengue", "Gingão", "Camuanga", "Kikoto", "Kaxexe",
+      "Kixikila", "Kupandula", "Kutomboka", "Kixima", "Kisangu", "Kisanji",
+      "Kissangua", "Makayabu", "Mufete", "Kizaka", "Funge", "Mbolo",
+      "Kuduro", "Kizomba", "Semba", "Kabetula", "Kazukuta", "Rebita",
+      "Kilapanga", "Pausada", "Múcua", "Maboque", "Ndisso", "Ginguenga",
+      "Sapessape", "Mungongo", "Marula", "Mulemba", "Baobá", "Muxima",
+      "Mbanza", "Ngola", "Nzambi", "Ngana", "Mwana", "Mona", "Muhatu",
+      "Mutu", "Mukulu", "Kilumba", "Dikamba", "Kima", "Nzila", "Kisalu",
+      "Maza", "Maji", "Ntangu", "Nitu", "Moyo", "Kiambote", "Kalunga",
+      "Kwanza", "Pemba", "Sanzala", "Nkoka", "Mbiji", "Jinguingi",
+      "Ngumbi", "Kitanda", "Inzo", "Kubata", "Dikalu", "Ngeleja",
+      "Dikanza", "Hungu", "Ngonga", "Ndamba", "Kijinga", "Ngangula",
+      "Mulamba", "Soba"
+    ]
+  };
+
+  const CONTENT_2026_2027_LOCAL = {
+    pt: {
+      movie: [
+        "Avatar: Fogo e Cinzas", "Vingadores: Doomsday", "The Super Mario Galaxy Movie",
+        "Toy Story 5", "Dune: Parte Três", "Homem-Aranha: Um Novo Dia", "A Odisseia",
+        "Moana", "Shrek 5", "Frozen 3", "The Batman: Parte II", "Star Wars: Starfighter",
+        "Vingadores: Secret Wars", "Projeto Hail Mary", "Mortal Kombat II", "Pânico 7",
+        "O Diabo Veste Prada 2", "Filhos de Sangue e Osso",
+        "A Era do Gelo: Ponto de Ebulição", "Supergirl", "Michael", "A Múmia",
+        "Agora Você Vê: Agora Não Vê", "The Dog Stars", "Five Nights at Freddy's 2"
+      ],
+      novela: [
+        "A Promessa", "A Herança", "Cacau", "Senne", "Festa é Festa", "O Clã",
+        "Terra Nova", "Os Eleitos", "A Fazenda", "Rabo de Peixe", "Três Graças",
+        "Quem Ama Cuida", "Coração Acelerado", "Beleza Fatal", "Vale Tudo (2025)",
+        "Garota do Momento", "Volta por Cima", "Mania de Você", "Renascer",
+        "No Rancho Fundo", "Fuzuê", "Terra e Paixão", "Vai na Fé", "Travessia",
+        "Cara e Coragem"
+      ]
+    },
+    en: {
+      movie: [
+        "Avatar: Fire and Ash", "Avengers: Doomsday", "The Super Mario Galaxy Movie",
+        "Toy Story 5", "Dune: Part Three", "Spider-Man: Brand New Day", "The Odyssey",
+        "Moana", "Shrek 5", "Frozen 3", "The Batman Part II", "Star Wars: Starfighter",
+        "Avengers: Secret Wars", "Project Hail Mary", "Mortal Kombat II", "Scream 7",
+        "The Devil Wears Prada 2", "Children of Blood and Bone",
+        "Ice Age: Boiling Point", "Supergirl", "Michael", "The Mummy",
+        "Now You See Me: Now You Don't", "The Dog Stars", "Five Nights at Freddy's 2"
+      ],
+      novela: [
+        "Beyond the Gates", "The Gates", "The Young and the Restless",
+        "The Bold and the Beautiful", "Days of Our Lives", "General Hospital",
+        "Neighbours", "Home and Away", "Hollyoaks", "EastEnders",
+        "Coronation Street", "Emmerdale", "The Hunting Wives", "The Gilded Age",
+        "Palm Royale", "The Buccaneers", "Bel-Air", "All American",
+        "Ginny & Georgia", "Sweet Magnolias", "Virgin River", "Emily in Paris"
+      ]
+    },
+    es: {
+      movie: [
+        "Avatar: Fuego y Ceniza", "Vengadores: Doomsday", "The Super Mario Galaxy Movie",
+        "Toy Story 5", "Dune: Parte Tres", "Spider-Man: Brand New Day", "La Odisea",
+        "Moana", "Shrek 5", "Frozen 3", "The Batman: Parte II", "Star Wars: Starfighter",
+        "Vengadores: Secret Wars", "Project Hail Mary", "Mortal Kombat II", "Scream 7",
+        "El Diablo Viste de Prada 2", "Children of Blood and Bone",
+        "Ice Age: Boiling Point", "Supergirl", "Michael", "La Momia",
+        "Ahora me ves: Ahora no me ves", "The Dog Stars", "Five Nights at Freddy's 2"
+      ],
+      novela: [
+        "La Casa de los Famosos", "La Casa de los Famosos México",
+        "El Señor de los Cielos", "La Reina del Sur", "Betty en NY",
+        "Café con Aroma de Mujer", "Pasión de Gavilanes", "La Usurpadora", "Rubí",
+        "Teresa", "Amores Verdaderos", "La Doña", "Señora Acero", "La Piloto",
+        "Marimar", "La Fea Más Bella", "Yo soy Betty, la fea", "Rebelde",
+        "Esmeralda", "María la del Barrio", "Cuna de Lobos",
+        "Los Ricos También Lloran", "La Madrastra", "Corazón Salvaje",
+        "La Promesa", "La Moderna", "Salomé", "Amar es para siempre"
+      ]
+    },
+    fr: {
+      movie: [
+        "Avatar : De feu et de cendres", "Avengers: Doomsday",
+        "The Super Mario Galaxy Movie", "Toy Story 5", "Dune : Troisième Partie",
+        "Spider-Man: Brand New Day", "L'Odyssée", "Moana", "Shrek 5",
+        "La Reine des neiges 3", "The Batman: Partie II", "Star Wars: Starfighter",
+        "Avengers: Secret Wars", "Project Hail Mary", "Mortal Kombat II", "Scream 7",
+        "Le Diable s'habille en Prada 2", "Children of Blood and Bone",
+        "L'Âge de glace : Point d'ébullition", "Supergirl", "Michael", "La Momie",
+        "Insaisissables 3", "The Dog Stars", "Five Nights at Freddy's 2"
+      ],
+      novela: [
+        "Plus belle la vie, encore plus belle", "Demain nous appartient",
+        "Ici tout commence", "Un si grand soleil", "Le Miel et les Abeilles",
+        "Hélène et les Garçons", "Clem", "Section de recherches",
+        "Camping paradis", "Joséphine, ange gardien", "Lupin", "Dix pour cent",
+        "Le Bureau des Légendes", "Baron noir", "Plus belle la vie",
+        "Les Feux de l'amour", "Amour, Gloire et Beauté", "Santa Barbara",
+        "Dallas", "Dynastie", "Sous le soleil", "Saint-Tropez", "Cœur Océan",
+        "Baie des Flamboyants", "Alice Nevers", "Julie Lescaut",
+        "Une femme d'honneur", "P.J.", "Avocats et Associés", "Central Nuit",
+        "Engrenages", "Braquo", "Mafiosa", "Maison close", "Marseille",
+        "Family Business", "Plan cœur", "Osmosis", "La Révolution", "Drôle",
+        "Tout cela je te le donnerai"
+      ]
+    }
+  };
+
   const EXTRA_CATEGORY_WORDS = {
     pt: Object.assign({}, SHARED_CATEGORY_WORDS, {
       novela: [
@@ -1982,6 +2347,25 @@
         new Set(current.concat(local[category]))
       );
     });
+
+    Object.keys(CONTENT_2026_2027_WORDS).forEach(function (category) {
+      const current = DATA[languageKey].categories[category] || [];
+      DATA[languageKey].categories[category] = Array.from(
+        new Set(current.concat(CONTENT_2026_2027_WORDS[category]))
+      );
+    });
+
+    const local2026 = CONTENT_2026_2027_LOCAL[languageKey] || CONTENT_2026_2027_LOCAL.en;
+    Object.keys(local2026).forEach(function (category) {
+      const current = DATA[languageKey].categories[category] || [];
+      DATA[languageKey].categories[category] = Array.from(
+        new Set(current.concat(local2026[category]))
+      );
+    });
+
+    DATA[languageKey].names = Array.from(
+      new Set((DATA[languageKey].names || []).concat(CONTENT_2026_2027_NAMES))
+    );
 
     Object.keys(ANGOLAN_NATIONAL_BY_CATEGORY).forEach(function (category) {
       if (category === 'national') return;
