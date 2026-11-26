@@ -30,7 +30,10 @@ document.addEventListener('DOMContentLoaded', function () {
     'sport',
     'brand',
     'profession',
-    'videogame'
+    'videogame',
+    'singer',
+    'musicstyle',
+    'national'
   ];
 
   const role = localStorage.getItem('onlineRole') === 'host' ? 'host' : 'guest';
@@ -867,6 +870,11 @@ document.addEventListener('DOMContentLoaded', function () {
         handleJoin(message, connection);
         break;
 
+      case 'draft':
+        if (!roundActive || submitted.has(connection.peer)) return;
+        answersByPlayer[connection.peer] = sanitizeAnswers(message.answers);
+        break;
+
       case 'answers':
         if (!roundActive) return;
         answersByPlayer[connection.peer] = sanitizeAnswers(message.answers);
@@ -1228,6 +1236,7 @@ document.addEventListener('DOMContentLoaded', function () {
       input.addEventListener('input', function () {
         input.classList.remove('valid', 'invalid');
         updateProgressForMe();
+        sendDraftAnswers();
 
         if (roundActive && !submitted.has(myId)) {
           pingTypingSound();
@@ -1396,15 +1405,32 @@ document.addEventListener('DOMContentLoaded', function () {
       tr('game.progressRoom', { filled: roomFilled, total: roomTotal });
   }
 
+  function readAnswersFromInputs() {
+    const answers = {};
+
+    categoryInputs.querySelectorAll('input').forEach(function (input) {
+      answers[input.dataset.category] = input.value.trim();
+    });
+
+    return answers;
+  }
+
+  function captureMyAnswers() {
+    if (!roundActive || submitted.has(myId)) return;
+
+    answersByPlayer[myId] = sanitizeAnswers(readAnswersFromInputs());
+    submitted.add(myId);
+  }
+
+  function sendDraftAnswers() {
+    if (role !== 'guest' || !roundActive || submitted.has(myId)) return;
+    send({ type: 'draft', answers: readAnswersFromInputs() });
+  }
+
   function submitMyAnswers(autoSubmit) {
     if (!roundActive || submitted.has(myId)) return;
 
-    const inputs = categoryInputs.querySelectorAll('input');
-    const answers = {};
-
-    inputs.forEach(function (input) {
-      answers[input.dataset.category] = input.value.trim();
-    });
+    const answers = readAnswersFromInputs();
 
     let penalty = 0;
 
@@ -1479,6 +1505,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function finishRound() {
     if (role !== 'host' || !roundActive) return;
 
+    captureMyAnswers();
     roundActive = false;
     stopTypingSound();
     clearInterval(timerInterval);

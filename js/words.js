@@ -31,7 +31,7 @@
   // para "Petro Atlético de Luanda", "Sagrada" para "Sagrada Esperança").
   const ALIAS_CATEGORIES = new Set([
     'football', 'city', 'food', 'fruit', 'country', 'movie', 'series', 'anime',
-    'novela', 'videogame', 'brand', 'sport'
+    'novela', 'videogame', 'brand', 'sport', 'singer', 'musicstyle', 'national'
   ]);
 
   function tokensOf(value) {
@@ -520,6 +520,49 @@
   };
 
   const SHARED_CATEGORY_WORDS = {
+    singer: [
+      "Bonga", "Anselmo Ralph", "C4 Pedro", "Paulo Flores", "Yola Semedo", "Ary",
+      "Élida Week", "Nsoki", "Landrick", "Djodje", "Nelson Freitas", "Matias Damásio",
+      "Kataleya", "Mylson", "Cef Tanzy", "Kiambi", "Caló Pascoal", "Eduardo Paim",
+      "Yuri da Cunha", "Heavy C", "Big Nelo", "SSP", "Rei Helder", "Yola Araújo",
+      "Selda", "Júlia Duarte", "Anna Joyce", "Márcia", "Célia Melo", "Filho do Zua",
+      "Gerilson Insrael", "Cage One", "Preto Show", "Tchobolito", "Hanay", "Nacob",
+      "Noite e Dia", "Impactus 4", "Zona 5", "N'Sex Love", "Faia", "Irina Vasconcelos",
+      "Fally Ipupa", "Papa Wemba", "Koffi Olomide", "Werrason", "JB Mpiana",
+      "Ferre Gola", "Kanda Bongo Man", "Awilo Longomba", "Pepe Kalle", "Maître Gims",
+      "Diamond Platnumz", "Harmonize", "Rayvanny", "Innoss'B", "Zuchu", "Mbosso",
+      "Ali Kiba", "Lady Jaydee", "Burna Boy", "Wizkid", "Davido", "Tiwa Savage",
+      "Yemi Alade", "Mr Eazi", "Tems", "Rema", "Asake", "Adekunle Gold",
+      "Fela Kuti", "Seun Kuti", "Femi Kuti", "2Baba", "D'banj", "P-Square",
+      "Kizz Daniel", "Omah Lay", "Joeboy", "Fireboy DML", "Ruger", "BNXN",
+      "Ayra Starr", "Teni", "Simi", "Johnny Drille", "Ric Hassani", "Korede Bello",
+      "Sarkodie", "Stonebwoy", "Black Sherif", "Amaarae", "Akon", "Youssou N'Dour",
+      "Baaba Maal", "Mory Kanté", "Salif Keita", "Oumou Sangaré", "Ismaël Lô",
+      "Ali Farka Touré", "Tinariwen", "Songhoy Blues", "Rokia Traoré",
+      "Fatoumata Diawara", "Dobet Gnahoré", "Angelique Kidjo", "Miriam Makeba",
+      "Hugh Masekela", "Brenda Fassie", "Lucky Dube", "Oliver Mtukudzi",
+      "Thomas Mapfumo", "Master KG", "Nasty C", "Cassper Nyovest", "AKA",
+      "Sho Madjozi", "Tyla", "Lura", "Lokua Kanza", "Mahmoud Ahmed",
+      "Aster Aweke", "Teddy Afro", "Eddy Kenzo", "Jose Chameleone", "Bobi Wine",
+      "Sauti Sol", "Bien", "Nneka", "Asa", "King Sunny Ade", "Ebenezer Obey",
+      "Cheb Khaled", "Rachid Taha", "Souad Massi", "Aya Nakamura"
+    ],
+    musicstyle: [
+      "Kuduro", "Kizomba", "Semba", "Kabetula", "Kazukuta", "Rebita",
+      "Kilapanga", "Pausada", "Zouk", "Zouk Love", "Afrobeats", "Afrobeat",
+      "Afrohouse", "Amapiano", "Highlife", "Makossa", "Soukous", "Ndombolo",
+      "Mbalax", "Raï", "Gnawa", "Fuji", "Juju", "Kwaito", "Maskandi", "Mbube",
+      "Isicathamiya", "Bongo Flava", "Taarab", "Gqom", "Shangaan Electro",
+      "Coupé-Décalé", "Zouglou", "Mapouka", "Mahraganat", "Chaabi", "Maloya",
+      "Séga", "Morna", "Coladeira", "Funaná", "Batuque", "Salsa", "Merengue",
+      "Bachata", "Cumbia", "Samba", "Lambada", "Forró", "Axé", "MPB", "Fado",
+      "Flamenco", "Tango", "Reggae", "Dancehall", "Gospel", "Hip Hop", "Rap",
+      "R&B", "Trap", "Drill", "Funk", "Soul", "Pop", "Rock", "Jazz", "Blues",
+      "Country", "Metal", "Punk", "Classical", "Disco", "K-pop", "J-pop",
+      "Bossa Nova", "Bolero", "Calypso", "Soca", "Kompa", "EDM", "House",
+      "Techno", "Trance", "Dubstep", "Drum and Bass", "Rock and Roll", "Swing",
+      "Reggaeton"
+    ],
     anime: [
       "Naruto", "One Piece", "Dragon Ball", "Dragon Ball Z", "Bleach", "Death Note",
       "Attack on Titan", "Shingeki no Kyojin", "Demon Slayer", "Kimetsu no Yaiba",
@@ -603,6 +646,47 @@
       "Subnautica", "Hollow Knight", "Celeste", "Cuphead", "It Takes Two"
     ]
   };
+
+  const ANGOLAN_NATIONAL_BY_CATEGORY = {
+    food: [
+      "Mbolo", "Pão", "Funge", "Funge de Bombó", "Kikwanga", "Kwanga",
+      "Makayabu", "Muamba", "Muamba de Galinha", "Calulu", "Mufete", "Kizaka",
+      "Saka-Saka", "Ginguba", "Jinguba", "Bombó", "Kissaca", "Kissangua",
+      "Mucussue", "Mucuá", "Dendém", "Gimboa", "Quiabo", "Mandioca", "Matapa",
+      "Pondu", "Miondo", "Kissuto", "Kandanda", "Kizomba"
+    ],
+    fruit: [
+      "Múcua", "Maboque", "Ndisso", "Ginguenga", "Sapessape", "Mungongo",
+      "Marula", "Mulemba", "Baobá"
+    ],
+    animal: [
+      "Mbiji", "Jinguingi", "Nkoka", "Ngumbi", "Kima"
+    ],
+    object: [
+      "Kitanda", "Inzo", "Kubata", "Dikalu", "Ngeleja", "Dikanza", "Hungu",
+      "Ngonga", "Ndamba", "Kijinga", "Mbanza"
+    ],
+    profession: [
+      "Ngangula", "Mulamba", "Soba", "Ngola"
+    ],
+    national: [
+      "Mbolo", "Funge", "Kizaka", "Makayabu", "Kikwanga", "Ginguba", "Bombó",
+      "Kissangua", "Múcua", "Maboque", "Ndisso", "Ginguenga", "Sapessape",
+      "Mungongo", "Marula", "Mulemba", "Baobá", "Muxima", "Mbanza", "Ngola",
+      "Nzambi", "Ngana", "Mwana", "Mona", "Muhatu", "Mutu", "Mukulu",
+      "Kilumba", "Dikamba", "Kima", "Nzila", "Kisalu", "Maza", "Maji",
+      "Ntangu", "Nitu", "Moyo", "Kiambote", "Kalunga", "Kwanza", "Pemba",
+      "Sanzala", "Nkoka", "Mbiji", "Jinguingi", "Ngumbi", "Kitanda", "Inzo",
+      "Kubata", "Dikalu", "Ngeleja", "Dikanza", "Hungu", "Ngonga", "Ndamba",
+      "Kijinga", "Ngangula", "Mulamba", "Soba", "Kuduro", "Kizomba", "Semba",
+      "Kabetula", "Kazukuta", "Rebita", "Kilapanga", "Pausada"
+    ]
+  };
+
+  const ANGOLAN_NATIONAL_WORDS = Object.keys(ANGOLAN_NATIONAL_BY_CATEGORY)
+    .reduce(function (all, category) {
+      return all.concat(ANGOLAN_NATIONAL_BY_CATEGORY[category]);
+    }, []);
 
   const MODERN_CATEGORY_WORDS = {
     anime: [
@@ -1898,6 +1982,18 @@
         new Set(current.concat(local[category]))
       );
     });
+
+    Object.keys(ANGOLAN_NATIONAL_BY_CATEGORY).forEach(function (category) {
+      if (category === 'national') return;
+      const current = DATA[languageKey].categories[category] || [];
+      DATA[languageKey].categories[category] = Array.from(
+        new Set(current.concat(ANGOLAN_NATIONAL_BY_CATEGORY[category]))
+      );
+    });
+
+    DATA[languageKey].categories.national = Array.from(
+      new Set((DATA[languageKey].categories.national || []).concat(ANGOLAN_NATIONAL_WORDS))
+    );
   });
 
   const language = window.I18N ? window.I18N.getLanguage() : 'en';
