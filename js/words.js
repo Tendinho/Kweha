@@ -31,7 +31,7 @@
   // para "Petro Atlético de Luanda", "Sagrada" para "Sagrada Esperança").
   const ALIAS_CATEGORIES = new Set([
     'football', 'city', 'food', 'fruit', 'country', 'movie', 'series', 'anime',
-    'novela', 'videogame', 'brand', 'sport', 'singer', 'musicstyle', 'national'
+    'novela', 'videogame', 'brand', 'sport', 'singer', 'musicstyle'
   ]);
 
   function tokensOf(value) {
@@ -668,25 +668,8 @@
     ],
     profession: [
       "Ngangula", "Mulamba", "Soba", "Ngola"
-    ],
-    national: [
-      "Mbolo", "Funge", "Kizaka", "Makayabu", "Kikwanga", "Ginguba", "Bombó",
-      "Kissangua", "Múcua", "Maboque", "Ndisso", "Ginguenga", "Sapessape",
-      "Mungongo", "Marula", "Mulemba", "Baobá", "Muxima", "Mbanza", "Ngola",
-      "Nzambi", "Ngana", "Mwana", "Mona", "Muhatu", "Mutu", "Mukulu",
-      "Kilumba", "Dikamba", "Kima", "Nzila", "Kisalu", "Maza", "Maji",
-      "Ntangu", "Nitu", "Moyo", "Kiambote", "Kalunga", "Kwanza", "Pemba",
-      "Sanzala", "Nkoka", "Mbiji", "Jinguingi", "Ngumbi", "Kitanda", "Inzo",
-      "Kubata", "Dikalu", "Ngeleja", "Dikanza", "Hungu", "Ngonga", "Ndamba",
-      "Kijinga", "Ngangula", "Mulamba", "Soba", "Kuduro", "Kizomba", "Semba",
-      "Kabetula", "Kazukuta", "Rebita", "Kilapanga", "Pausada"
     ]
   };
-
-  const ANGOLAN_NATIONAL_WORDS = Object.keys(ANGOLAN_NATIONAL_BY_CATEGORY)
-    .reduce(function (all, category) {
-      return all.concat(ANGOLAN_NATIONAL_BY_CATEGORY[category]);
-    }, []);
 
   const MODERN_CATEGORY_WORDS = {
     anime: [
@@ -1130,24 +1113,6 @@
       "Gengetone", "Afro-drill", "3-Step", "Bouyon", "Kuduro", "Kizomba",
       "Semba", "Zouk", "Kabetula", "Kazukuta", "Rebita", "Kilapanga",
       "Pausada"
-    ],
-    national: [
-      "Kota", "Brada", "Mano", "Kamba", "Mboa", "Cota", "Pitéu",
-      "Zungueira", "Candongueiro", "Kupapata", "Kubika", "Kutanda",
-      "Kuzola", "Kusala", "Kufa", "Kuxica", "Kubanza", "Kuxinga", "Maka",
-      "Bazar", "Ndengue", "Gingão", "Camuanga", "Kikoto", "Kaxexe",
-      "Kixikila", "Kupandula", "Kutomboka", "Kixima", "Kisangu", "Kisanji",
-      "Kissangua", "Makayabu", "Mufete", "Kizaka", "Funge", "Mbolo",
-      "Kuduro", "Kizomba", "Semba", "Kabetula", "Kazukuta", "Rebita",
-      "Kilapanga", "Pausada", "Múcua", "Maboque", "Ndisso", "Ginguenga",
-      "Sapessape", "Mungongo", "Marula", "Mulemba", "Baobá", "Muxima",
-      "Mbanza", "Ngola", "Nzambi", "Ngana", "Mwana", "Mona", "Muhatu",
-      "Mutu", "Mukulu", "Kilumba", "Dikamba", "Kima", "Nzila", "Kisalu",
-      "Maza", "Maji", "Ntangu", "Nitu", "Moyo", "Kiambote", "Kalunga",
-      "Kwanza", "Pemba", "Sanzala", "Nkoka", "Mbiji", "Jinguingi",
-      "Ngumbi", "Kitanda", "Inzo", "Kubata", "Dikalu", "Ngeleja",
-      "Dikanza", "Hungu", "Ngonga", "Ndamba", "Kijinga", "Ngangula",
-      "Mulamba", "Soba"
     ]
   };
 
@@ -2368,16 +2333,11 @@
     );
 
     Object.keys(ANGOLAN_NATIONAL_BY_CATEGORY).forEach(function (category) {
-      if (category === 'national') return;
       const current = DATA[languageKey].categories[category] || [];
       DATA[languageKey].categories[category] = Array.from(
         new Set(current.concat(ANGOLAN_NATIONAL_BY_CATEGORY[category]))
       );
     });
-
-    DATA[languageKey].categories.national = Array.from(
-      new Set((DATA[languageKey].categories.national || []).concat(ANGOLAN_NATIONAL_WORDS))
-    );
   });
 
   const language = window.I18N ? window.I18N.getLanguage() : 'en';

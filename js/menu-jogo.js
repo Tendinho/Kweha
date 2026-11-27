@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const ALLOWED_CATEGORIES = [
     'name', 'country', 'animal', 'fruit', 'color', 'object', 'city', 'food',
     'movie', 'anime', 'football', 'novela', 'series', 'sport', 'brand',
-    'profession', 'videogame', 'singer', 'musicstyle', 'national'
+    'profession', 'videogame', 'singer', 'musicstyle'
   ];
 
   const PORTUGUESE_DICTIONARIES = {
@@ -270,8 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
       profession: 'Profissão',
       videogame: 'Videojogo',
       singer: 'Cantor',
-      musicstyle: 'Estilo musical',
-      national: 'Palavras de Angola'
+      musicstyle: 'Estilo musical'
     };
     return names[category] || category;
   }

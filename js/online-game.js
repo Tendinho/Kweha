@@ -32,8 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     'profession',
     'videogame',
     'singer',
-    'musicstyle',
-    'national'
+    'musicstyle'
   ];
 
   const role = localStorage.getItem('onlineRole') === 'host' ? 'host' : 'guest';
@@ -1430,6 +1429,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function submitMyAnswers(autoSubmit) {
     if (!roundActive || submitted.has(myId)) return;
 
+    const inputs = categoryInputs.querySelectorAll('input');
     const answers = readAnswersFromInputs();
 
     let penalty = 0;
